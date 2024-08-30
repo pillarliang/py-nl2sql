@@ -1,0 +1,10 @@
+openai
+pydantic
+python-dotenv
+faiss-cpu
+numpy
+langchain-openai
+sqlalchemy
+pymysql
+poetry-core
+pytest
