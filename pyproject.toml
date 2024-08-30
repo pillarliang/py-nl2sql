@@ -5,8 +5,8 @@ description = "A toolkit for converting natural language to SQL statements."
 authors = ["liangzhu <pillarliang21@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/yourusername/your-package"
-repository = "https://github.com/yourusername/your-package"
+homepage = "https://github.com/pillarliang/py-nl2sql"
+repository = "https://github.com/pillarliang/py-nl2sql"
 
 [tool.poetry.dependencies]
 python = "^3.8.1"

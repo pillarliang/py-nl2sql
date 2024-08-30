@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class NL2SQLWorkflow:
-    def __init__(self, db_instance: DBInstance, query: str, need_similarity_sql: bool = True):
+    def __init__(self, db_instance: DBInstance, query: str, llm: LLM, need_similarity_sql: bool = True):
         self.db_instance = db_instance
-        self.llm = LLM()  # init LLM model
+        self.llm = llm  # init LLM model
         self.origin_query = query
         self.text_to_sql_query: Optional[str] = None  # used for sql generation
         self.interpretation_query: Optional[str] = None  # used for final response generation
