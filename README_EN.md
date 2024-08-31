@@ -29,7 +29,7 @@
 ## Architecture
 
 <p align="center">
-  <img src="./assets/nl2sql_structure.jpg" width="800px" />
+  <img src="./assets/nl2sql_structure.png" width="800px" />
 </p>
 
 
