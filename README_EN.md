@@ -21,10 +21,12 @@
 </div>
 
 
-## 目录
+## Table of Contents
 - [Architecture](#Architecture)
-- [Install and Usage](#Install and Usage)
-- [User Guide](#User Guide)
+
+- [Install and Usage](#Install_and_Usage)
+
+- [User Guide](#User_Guide)
 
 ## Architecture
 
@@ -33,7 +35,7 @@
 </p>
 
 
-## Install and Usage
+## Install_and_Usage
 ```python
 # pip install py_nl2sql  
 from py_nl2sql import LLM,DBInstance,NL2SQLWorkflow
@@ -54,7 +56,7 @@ service = NL2SQLWorkflow(instance, query, llm)
 res = service.get_response() 
 print(res)
 ```
-## User Guide
+## User_Guide
 When using this project, users need to provide the following three pieces of information:
 ### 1. OpenAI Key
 
