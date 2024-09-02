@@ -26,7 +26,7 @@ class PreRetrievalService:
         return response["rephrased_query"]
 
     @classmethod
-    def hype(cls, query: str) -> str:
+    def hyde(cls, query: str) -> str:
         prompts = f"Please provide a hypothetical answer to the question {query}. The answer should be concise and not require detailed explanations."
         response = cls.llm.get_structured_response(prompts, HydeResponse)
         return response["hyde"]
@@ -36,4 +36,3 @@ class PreRetrievalService:
         response = cls.llm.get_structured_response(DECOMPOSE_QUERY_FOR_SQL.format(question=query), DecomposeQueryResponse)
         # convert dict to pydantic model
         return DecomposeQueryResponse(**response)
-

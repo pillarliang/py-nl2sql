@@ -22,7 +22,7 @@ class LLM:
 
     def get_response(self, query: str):
         completion = self.client.chat.completions.create(
-            model=LLMModel.Default.value,
+            model=LLMModel.Default,
             messages=[
                 {"role": "user", "content": query},
             ],
@@ -31,11 +31,9 @@ class LLM:
 
     def get_structured_response(self, query: str, response_format):
         completion = self.client.beta.chat.completions.parse(
-            model=LLMModel.Default.value,
+            model=LLMModel.Default,
             # TODO: currently using a specific model, due to only lasted model support structured response
-            messages=[
-                {"role": "user", "content": query}
-            ],
+            messages=[{"role": "user", "content": query}],
             response_format=response_format,
         )
 
@@ -60,12 +58,9 @@ class LLM:
             messages.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{item}"}})
 
         completion = self.client.chat.completions.create(
-            model=LLMModel.GPT_4o_mini.value,
+            model=LLMModel.GPT_4o_mini,
             messages=[
-                {
-                    "role": "user",
-                    "content": messages
-                },
+                {"role": "user", "content": messages},
             ],
         )
         return completion.choices[0].message.content
@@ -73,4 +68,3 @@ class LLM:
     @property
     def embedding_model(self):
         return OpenAIEmbeddings(api_key=self.api_key, base_url=self.base_url)
-

@@ -36,8 +36,8 @@ def rdb_factory(
         ValueError: If the db_type is not supported.
     """
     connector_map: Dict[str, Type[SQLDatabase]] = {
-        RDBType.MySQL.value: MySQLConnector,
-        RDBType.Postgresql.value: PostgreSQLConnector,
+        RDBType.MySQL: MySQLConnector,
+        RDBType.Postgresql: PostgreSQLConnector,
     }
     connector_class = connector_map.get(db_type)
     if connector_class:

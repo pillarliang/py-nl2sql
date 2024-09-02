@@ -38,7 +38,7 @@ class GenerateSampleSQLResponse(BaseModel):
     sql_list: List[str]
 
 
-class LLMModel(Enum):
+class LLMModel(str, Enum):
     Default = "gpt-4o-mini"
     GPT_latest = "chatgpt-4o-latest"
     GPT_4o = "gpt-4o"
@@ -47,7 +47,7 @@ class LLMModel(Enum):
     Moonshoot_v1_8k = "moonshot-v1-8k"
 
 
-class RDBType(Enum):
+class RDBType(str, Enum):
     """Database type enumeration."""
     MySQL = "mysql"
     SQLite = "sqlite"

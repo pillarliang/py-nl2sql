@@ -7,8 +7,10 @@ from typing import List, Tuple
 import faiss
 import numpy as np
 
+from py_nl2sql.vector_database.base_vectordb import BaseVectorDB
 
-class FaissWrapper:
+
+class FaissWrapper(BaseVectorDB):
     def __init__(
             self,
             text_chunks,

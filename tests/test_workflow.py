@@ -19,7 +19,7 @@ def test_nl2sql_workflow():
 
     query = "what is price of `1968 Ford Mustang`"
 
-    service = NL2SQLWorkflow(instance, query)
+    service = NL2SQLWorkflow(instance, query, llm)
 
     res = service.get_response()
 
