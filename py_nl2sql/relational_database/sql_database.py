@@ -23,6 +23,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import URL, Engine, Result
 from sqlalchemy.exc import ProgrammingError, SQLAlchemyError
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.sql.expression import Executable
 from sqlalchemy.types import NullType
@@ -49,24 +50,25 @@ def truncate_word(content: Any, *, length: int, suffix: str = "...") -> str:
 
     return content[: length - len(suffix)].rsplit(" ", 1)[0] + suffix
 
+
 class SQLDatabase:
     """SQLAlchemy wrapper around a database."""
     driver: str = ""
     port: int = 0
 
     def __init__(
-        self,
-        engine: Engine,
-        schema: Optional[str] = None,
-        metadata: Optional[MetaData] = None,
-        ignore_tables: Optional[List[str]] = None,
-        include_tables: Optional[List[str]] = None,
-        sample_rows_in_table_info: int = 3,
-        indexes_in_table_info: bool = False,
-        custom_table_info: Optional[dict] = None,
-        view_support: bool = False,
-        max_string_length: int = 300,
-        lazy_table_reflection: bool = False,
+            self,
+            engine: Engine,
+            schema: Optional[str] = None,
+            metadata: Optional[MetaData] = None,
+            ignore_tables: Optional[List[str]] = None,
+            include_tables: Optional[List[str]] = None,
+            sample_rows_in_table_info: int = 3,
+            indexes_in_table_info: bool = False,
+            custom_table_info: Optional[dict] = None,
+            view_support: bool = False,
+            max_string_length: int = 300,
+            lazy_table_reflection: bool = False,
     ):
         """Create engine from database URI."""
         self._engine = engine
@@ -74,7 +76,9 @@ class SQLDatabase:
         if include_tables and ignore_tables:
             raise ValueError("Cannot specify both include_tables and ignore_tables")
 
-        self._inspector = inspect(self._engine)
+        self._inspector = inspect(self._engine)  # 创建了一个数据库检查器（inspector）对象。用于获取数据库的元数据。
+        session_factory = sessionmaker(bind=engine)
+        self.Session = scoped_session(session_factory)
 
         # including view support by adding the views as well as tables to the all
         # tables list if view_support is True
@@ -134,16 +138,21 @@ class SQLDatabase:
                 schema=self._schema,
             )
 
+    @property
+    def engine(self) -> Engine:
+        """Return the engine."""
+        return self._engine
+
     @classmethod
     def from_uri_db(
-        cls,
-        host: str,
-        user: str,
-        password: str,
-        db_name: str,
-        port: Optional[str] = None,
-        engine_args: Optional[dict] = None,
-        **kwargs: Any,
+            cls,
+            host: str,
+            user: str,
+            password: str,
+            db_name: str,
+            port: Optional[str] = None,
+            engine_args: Optional[dict] = None,
+            **kwargs: Any,
     ) -> SQLDatabase:
         """🌟@by:pillar 🌟
         Construct a SQLAlchemy engine from uri database.
@@ -177,7 +186,8 @@ class SQLDatabase:
                     ...
                 ]
         """
-        return self._inspector.get_columns(table_name)  # sqlalchem native method. We can get the column, constraint, index and other information of the database table through inspect.
+        return self._inspector.get_columns(
+            table_name)  # sqlalchem native method. We can get the column, constraint, index and other information of the database table through inspect.
 
     def get_indexes(self, table_name: str) -> List[Dict]:
         """Get table indexes about specified table.
@@ -263,10 +273,10 @@ class SQLDatabase:
 
     @classmethod
     def from_uri(
-        cls,
-        database_uri: Union[str, URL],
-        engine_args: Optional[dict] = None,
-        **kwargs: Any,
+            cls,
+            database_uri: Union[str, URL],
+            engine_args: Optional[dict] = None,
+            **kwargs: Any,
     ) -> SQLDatabase:
         """Construct a SQLAlchemy engine from URI."""
         _engine_args = engine_args or {}
@@ -319,7 +329,7 @@ class SQLDatabase:
             tbl
             for tbl in self._metadata.sorted_tables
             if tbl.name in set(all_table_names)
-            and not (self.dialect == "sqlite" and tbl.name.startswith("sqlite_"))
+               and not (self.dialect == "sqlite" and tbl.name.startswith("sqlite_"))
         ]
 
         tables = []
@@ -337,7 +347,7 @@ class SQLDatabase:
             create_table = str(CreateTable(table).compile(self._engine))
             table_info = f"{create_table.rstrip()}"
             has_extra_info = (
-                self._indexes_in_table_info or self._sample_rows_in_table_info
+                    self._indexes_in_table_info or self._sample_rows_in_table_info
             )
             if has_extra_info:
                 table_info += "\n\n/*"
@@ -388,12 +398,12 @@ class SQLDatabase:
         )
 
     def _execute(
-        self,
-        command: Union[str, Executable],
-        fetch: Literal["all", "one", "cursor"] = "all",
-        *,
-        parameters: Optional[Dict[str, Any]] = None,
-        execution_options: Optional[Dict[str, Any]] = None,
+            self,
+            command: Union[str, Executable],
+            fetch: Literal["all", "one", "cursor"] = "all",
+            *,
+            parameters: Optional[Dict[str, Any]] = None,
+            execution_options: Optional[Dict[str, Any]] = None,
     ) -> Union[Sequence[Dict[str, Any]], Result]:
         """
         Executes SQL command through underlying engine.
@@ -477,13 +487,13 @@ class SQLDatabase:
         return []
 
     def run(
-        self,
-        command: Union[str, Executable],
-        fetch: Literal["all", "one", "cursor"] = "all",
-        include_columns: bool = False,
-        *,
-        parameters: Optional[Dict[str, Any]] = None,
-        execution_options: Optional[Dict[str, Any]] = None,
+            self,
+            command: Union[str, Executable],
+            fetch: Literal["all", "one", "cursor"] = "all",
+            include_columns: bool = False,
+            *,
+            parameters: Optional[Dict[str, Any]] = None,
+            execution_options: Optional[Dict[str, Any]] = None,
     ) -> Union[str, Sequence[Dict[str, Any]], Result[Any]]:
         """Execute a SQL command and return a string representing the results.
 
@@ -530,13 +540,13 @@ class SQLDatabase:
             return f"Error: {e}"
 
     def run_no_throw(
-        self,
-        command: str,
-        fetch: Literal["all", "one"] = "all",
-        include_columns: bool = False,
-        *,
-        parameters: Optional[Dict[str, Any]] = None,
-        execution_options: Optional[Dict[str, Any]] = None,
+            self,
+            command: str,
+            fetch: Literal["all", "one"] = "all",
+            include_columns: bool = False,
+            *,
+            parameters: Optional[Dict[str, Any]] = None,
+            execution_options: Optional[Dict[str, Any]] = None,
     ) -> Union[str, Sequence[Dict[str, Any]], Result[Any]]:
         """Execute a SQL command and return a string representing the results.
 

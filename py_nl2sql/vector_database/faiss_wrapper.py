@@ -16,7 +16,7 @@ class FaissWrapper(BaseVectorDB):
             text_chunks,
             embedding,
             index_type="Flat",
-            metric=faiss.METRIC_L2,
+            similarity_measure=faiss.METRIC_L2,
             nlist=100,
             hnsw_m=32
     ):
@@ -33,7 +33,7 @@ class FaissWrapper(BaseVectorDB):
         self.text_chunks = text_chunks
         self.embedding = embedding
         self.index_type = index_type
-        self.metric = metric
+        self.metric = similarity_measure
         self.nlist = nlist
         self.hnsw_m = hnsw_m
 

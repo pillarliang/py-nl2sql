@@ -23,7 +23,7 @@ def rdb_factory(
         db_port: Optional[str] = None,
         db_user: Optional[str] = None,
         db_password: Optional[str] = None,
-):
+) -> SQLDatabase:
     """Relational Database Factory. Create a database connector instance based on the database type.
     :param:
         db_type (str)
