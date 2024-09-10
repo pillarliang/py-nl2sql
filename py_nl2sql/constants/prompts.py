@@ -8,61 +8,41 @@ Note: Different languages should use prompts that are appropriate for that langu
 
 class NL2SQLPrompts:
     GENERATE_SQL = """
-        You are a MySQL expert. 
-    
-        Given an input question, first create a syntactically correct MySQL query to run, then look at the results of the query and return the answer to the input question.
-    
-        Unless the user specifies in the question a specific number of examples to obtain, query for at most 5 results using the LIMIT clause as per MySQL. 
-    
-        You can order the results to return the most informative data in the database.
-    
-        Never query for all columns from a table. You must query only the columns that are needed to answer the question. 
-        Wrap each column name in backticks (`) to denote them as delimited identifiers.
-    
-        Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
-    
-        Pay attention to use CURDATE() function to get the current date, if the question involves "today".
-    
-        Use the following format:
-    
-        Question: Question here
-        SQLQuery: SQL Query to run
-    
-        Only use the following tables:
+    You are a database expert. 
+    Please create a syntactically correct SQL query based on the user's question and some of the available table structure definitions of the database.
+
+    Table structure information:
         {table_info}
-    
-        Question: {input}
+        
+    Constraint:
+    1.Please understand the user's intention based on the user's question, and use the given table structure definition to create a grammatically correct {dialect} sql. 
+    2.You can only use the tables provided in the table structure information to generate sql. If you cannot generate sql based on the provided table structure, please say: "The table structure information provided is not enough to generate sql queries." It is prohibited to fabricate information at will.
+    3.Please be careful not to mistake the relationship between tables and columns when generating SQL.
+    4.Please check the correctness of the SQL and ensure that the query performance is optimized under correct conditions. Your returned SQL should start with the `SELECT` keyword.
+     
+    User Question:
+        {input}
+    Please think step by step and ensure the response is correct json and can be parsed by Python json.loads.
     """
 
-    GENERATE_SQL_WITH_SIMILARITY = """
-        You are a MySQL expert. 
-    
-        Given an input question, first create a syntactically correct MySQL query to run, then look at the results of the query and return the answer to the input question.
-    
-        Unless the user specifies in the question a specific number of examples to obtain, query for at most 5 results using the LIMIT clause as per MySQL. 
-    
-        You can order the results to return the most informative data in the database.
-    
-        Never query for all columns from a table. You must query only the columns that are needed to answer the question. 
-        Wrap each column name in backticks (`) to denote them as delimited identifiers.
-    
-        Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
-    
-        Pay attention to use CURDATE() function to get the current date, if the question involves "today".
-    
-        Use the following format:
-    
-        Question: Question here
-        SQLQuery: SQL Query to run
-    
-    
-        Only use the following tables:
+    GENERATE_SQL_WITH_SIMILARITY_SQL = """
+    You are a database expert. 
+    Please create a syntactically correct SQL query based on the user's question and some of the available table structure definitions of the database, and some related SQl.
+
+    Table structure information:
         {table_info}
-    
-        Similarity SQL for reference:
+    Related SQL:
         {similarity_sql}
-    
-        Question: {input}
+        
+    Constraint:
+    1.Please understand the user's intention based on the user's question, and use the given table structure definition and related SQls to create a grammatically correct {dialect} sql. 
+    2.You can only use the tables provided in the table structure information to generate sql. If you cannot generate sql based on the provided table structure, please say: "The table structure information provided is not enough to generate sql queries." It is prohibited to fabricate information at will.
+    3.Please be careful not to mistake the relationship between tables and columns when generating SQL.
+    4.Please check the correctness of the SQL and ensure that the query performance is optimized under correct conditions. Your returned SQL should start with the `SELECT` keyword.
+     
+    User Question:
+        {input}
+    Please think step by step and ensure the response is correct json and can be parsed by Python json.loads.
     """
 
     SQL_QUERY_ANSWER = """

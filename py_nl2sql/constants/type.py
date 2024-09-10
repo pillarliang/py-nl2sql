@@ -30,8 +30,7 @@ class DecomposeQueryResponse(BaseModel):
 
 
 class GenerateSQLResponse(BaseModel):
-    original_query: str
-    sql_query: str
+    sql: str
 
 
 class GenerateSampleSQLResponse(BaseModel):

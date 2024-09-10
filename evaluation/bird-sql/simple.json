@@ -1,0 +1,1186 @@
+[
+    {
+        "question_id": 1471,
+        "db_id": "debit_card_specializing",
+        "question": "What is the ratio of customers who pay in EUR against customers who pay in CZK?",
+        "evidence": "ratio of customers who pay in EUR against customers who pay in CZK = count(Currency = 'EUR') / count(Currency = 'CZK').",
+        "SQL": "SELECT  CAST(SUM(CASE WHEN `Currency` = 'EUR' THEN 1 ELSE 0 END) AS DOUBLE) / SUM(CASE WHEN `Currency` = 'CZK' THEN 1 ELSE 0 END) FROM `customers`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1483,
+        "db_id": "debit_card_specializing",
+        "question": "How much did customer 6 consume in total between August and November 2013?",
+        "evidence": "Between August And November 2013 refers to Between 201308 And 201311; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+        "SQL": "SELECT\n  SUM(`Consumption`)\nFROM `yearmonth`\nWHERE\n  `CustomerID` = 6 AND `Date` BETWEEN '201308' AND '201311'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1484,
+        "db_id": "debit_card_specializing",
+        "question": "How many more \"discount\" gas stations does the Czech Republic have compared to Slovakia?",
+        "evidence": "Czech Republic can be represented as the Country value in gasstations table is 'CZE'; Slovakia can be represented as the Country value in the gasstations table is 'SVK';  Computation of more \"discount\" gas stations= Total no. of discount gas stations in Czech Republic - Total no. of discount gas stations in Slovakia",
+        "SQL": "SELECT\n  SUM(CASE WHEN `Country` = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN `Country` = 'SVK' THEN 1 ELSE 0 END)\nFROM `gasstations`\nWHERE\n  `Segment` = 'Discount'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1486,
+        "db_id": "debit_card_specializing",
+        "question": "Is it true that more SMEs pay in Czech koruna than in euros? If so, how many more?",
+        "evidence": "Amount of more SMEs = Total of SMEs pay using Currency CZK - Total of SMEs pay using Currency EUR",
+        "SQL": "SELECT\n  SUM(`Currency` = 'CZK') - SUM(`Currency` = 'EUR')\nFROM `customers`\nWHERE\n  `Segment` = 'SME'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1493,
+        "db_id": "debit_card_specializing",
+        "question": "In February 2012, what percentage of customers consumed more than 528.3?",
+        "evidence": "February 2012 refers to '201202' in yearmonth.date; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+        "SQL": "SELECT\n  CAST(SUM(CASE WHEN `Consumption` > 528.3 THEN 1 ELSE 0 END) AS DOUBLE) * 100 / COUNT(`CustomerID`)\nFROM `yearmonth`\nWHERE\n  `Date` = '201202'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1498,
+        "db_id": "debit_card_specializing",
+        "question": "What is the highest monthly consumption in the year 2012?",
+        "evidence": "The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+        "SQL": "SELECT\n  SUM(`Consumption`)\nFROM `yearmonth`\nWHERE\n  SUBSTR(`Date`, 1, 4) = '2012'\nGROUP BY\n  SUBSTR(`Date`, 5, 2)\nORDER BY\n  SUM(`Consumption`) DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1500,
+        "db_id": "debit_card_specializing",
+        "question": "Please list the product description of the products consumed in September, 2013.",
+        "evidence": "September 2013 refers to 201309; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+        "SQL": "SELECT\n  `T3`.`Description`\nFROM `transactions_1k` AS `T1`\nINNER JOIN `yearmonth` AS `T2`\n  ON `T1`.`CustomerID` = `T2`.`CustomerID`\nINNER JOIN `products` AS `T3`\n  ON `T1`.`ProductID` = `T3`.`ProductID`\nWHERE\n  `T2`.`Date` = '201309'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1505,
+        "db_id": "debit_card_specializing",
+        "question": "Among the customers who paid in euro, how many of them have a monthly consumption of over 1000?",
+        "evidence": "Pays in euro = Currency = 'EUR'.",
+        "SQL": "SELECT\n  COUNT(*)\nFROM `yearmonth` AS `T1`\nINNER JOIN `customers` AS `T2`\n  ON `T1`.`CustomerID` = `T2`.`CustomerID`\nWHERE\n  `T2`.`Currency` = 'EUR' AND `T1`.`Consumption` > 1000.00",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1507,
+        "db_id": "debit_card_specializing",
+        "question": "Please list the disparate time of the transactions taken place in the gas stations from chain no. 11.",
+        "evidence": "",
+        "SQL": "SELECT DISTINCT\n  `T1`.`Time`\nFROM `transactions_1k` AS `T1`\nINNER JOIN `gasstations` AS `T2`\n  ON `T1`.`GasStationID` = `T2`.`GasStationID`\nWHERE\n  `T2`.`ChainID` = 11",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1514,
+        "db_id": "debit_card_specializing",
+        "question": "What kind of currency did the customer paid at 16:25:00 in 2012/8/24?",
+        "evidence": "'2012/8/24' can be represented by '2012-08-24'; ",
+        "SQL": "SELECT DISTINCT\n  `T3`.`Currency`\nFROM `transactions_1k` AS `T1`\nINNER JOIN `gasstations` AS `T2`\n  ON `T1`.`GasStationID` = `T2`.`GasStationID`\nINNER JOIN `customers` AS `T3`\n  ON `T1`.`CustomerID` = `T3`.`CustomerID`\nWHERE\n  `T1`.`Date` = '2012-08-24' AND `T1`.`Time` = '16:25:00'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1515,
+        "db_id": "debit_card_specializing",
+        "question": "What segment did the customer have at 2012/8/23 21:20:00?",
+        "evidence": "'2012/8/23' can be represented by '2012-08-23'",
+        "SQL": "SELECT\n  `T2`.`Segment`\nFROM `transactions_1k` AS `T1`\nINNER JOIN `customers` AS `T2`\n  ON `T1`.`CustomerID` = `T2`.`CustomerID`\nWHERE\n  `T1`.`date` = '2012-08-23' AND `T1`.`time` = '21:20:00'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1524,
+        "db_id": "debit_card_specializing",
+        "question": "What's the nationality of the customer who spent 548.4 in 2012/8/24?",
+        "evidence": "'2012/8/24' can be represented by '2012-08-24'",
+        "SQL": "SELECT\n  `T2`.`Country`\nFROM `transactions_1k` AS `T1`\nINNER JOIN `gasstations` AS `T2`\n  ON `T1`.`GasStationID` = `T2`.`GasStationID`\nWHERE\n  `T1`.`Date` = '2012-08-24' AND  `T1`.`Price` = 548.4",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1525,
+        "db_id": "debit_card_specializing",
+        "question": "What is the percentage of the customers who used EUR in 2012/8/25?",
+        "evidence": "'2012/8/25' can be represented by '2012-08-25'",
+        "SQL": "SELECT\n  CAST(SUM(CASE WHEN `T2`.`Currency` = 'EUR' THEN 1 ELSE 0 END) AS DOUBLE) * 100 / COUNT(`T1`.`CustomerID`)\nFROM `transactions_1k` AS `T1`\nINNER JOIN `customers` AS `T2`\n  ON `T1`.`CustomerID` = `T2`.`CustomerID`\nWHERE\n  `T1`.`Date` = '2012-08-25'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1528,
+        "db_id": "debit_card_specializing",
+        "question": "What is the percentage of \"premium\" against the overall segment in Country = \"SVK\"?",
+        "evidence": "",
+        "SQL": "SELECT\n  CAST(SUM(CASE WHEN `Country` = 'SVK' AND `Segment` = 'Premium' THEN 1 ELSE 0 END) AS DOUBLE) * 100 / SUM(CASE WHEN `Country` = 'SVK' THEN 1 ELSE 0 END)\nFROM `gasstations`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1312,
+        "db_id": "student_club",
+        "question": "What's Angela Sanders's major?",
+        "evidence": "Angela Sanders is the full name; full name refers to first_name, last_name; major refers to major_name.",
+        "SQL": "SELECT\n  `T2`.`major_name`\nFROM `member` AS `T1`\nINNER JOIN `major` AS `T2`\n  ON `T1`.`link_to_major` = `T2`.`major_id`\nWHERE\n  `T1`.`first_name` = 'Angela' AND `T1`.`last_name` = 'Sanders'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1331,
+        "db_id": "student_club",
+        "question": "What is the amount of the funds that the Vice President received?",
+        "evidence": "'Vice President' is a position of Student Club; funds received refers to amount.",
+        "SQL": "SELECT\n  `T2`.`amount`\nFROM `member` AS `T1`\nINNER JOIN `income` AS `T2`\n  ON `T1`.`member_id` = `T2`.`link_to_member`\nWHERE\n  `T1`.`position` = 'Vice President'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1334,
+        "db_id": "student_club",
+        "question": "List the full name of the Student_Club members that grew up in Illinois state.",
+        "evidence": "full name of member refers to first_name, last_name",
+        "SQL": "SELECT\n  `T1`.`first_name`,\n  `T1`.`last_name`\nFROM `member` AS `T1`\nINNER JOIN `zip_code` AS `T2`\n  ON `T1`.`zip` = `T2`.`zip_code`\nWHERE\n  `T2`.`state` = 'Illinois'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1344,
+        "db_id": "student_club",
+        "question": "What was the notes of the fundraising on 2019/9/14?",
+        "evidence": "fundraising on 2019/9/14 refers to source = 'Fundraising' where date_received = '2019-09-14'",
+        "SQL": "SELECT\n  `notes`\nFROM `income`\nWHERE\n  `source` = 'Fundraising' AND `date_received` = '2019-09-14'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1346,
+        "db_id": "student_club",
+        "question": "Tell the phone number of \"Carlo Jacobs\".",
+        "evidence": "Carlo Jacobs is the full name; full name refers to first_name, last_name;",
+        "SQL": "SELECT\n  `phone`\nFROM `member`\nWHERE\n  `first_name` = 'Carlo' AND `last_name` = 'Jacobs'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1351,
+        "db_id": "student_club",
+        "question": "What was Brent Thomason's major?",
+        "evidence": "Brent Thomason is the full name; full name refers to first_name, last_name; major refers to major_name",
+        "SQL": "SELECT\n  `T2`.`major_name`\nFROM `member` AS `T1`\nINNER JOIN `major` AS `T2`\n  ON `T1`.`link_to_major` = `T2`.`major_id`\nWHERE\n  `T1`.`first_name` = 'Brent' AND `T1`.`last_name` = 'Thomason'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1356,
+        "db_id": "student_club",
+        "question": "Which department was the President of the club in?",
+        "evidence": "'President' is a position of Student Club",
+        "SQL": "SELECT\n  `T2`.`department`\nFROM `member` AS `T1`\nINNER JOIN `major` AS `T2`\n  ON `T1`.`link_to_major` = `T2`.`major_id`\nWHERE\n  `T1`.`position` = 'President'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1357,
+        "db_id": "student_club",
+        "question": "State the date Connor Hilton paid his/her dues.",
+        "evidence": "Connor Hilton is the full name; full name refers to first_name, last_name; date the dues was paid refers to date_received where source = 'Dues';",
+        "SQL": "SELECT\n  `T2`.`date_received`\nFROM `member` AS `T1`\nINNER JOIN `income` AS `T2`\n  ON `T1`.`member_id` = `T2`.`link_to_member`\nWHERE\n  `T1`.`first_name` = 'Connor'\n  AND `T1`.`last_name` = 'Hilton'\n  AND `T2`.`source` = 'Dues'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1361,
+        "db_id": "student_club",
+        "question": "What is the total cost of the pizzas for all the events?",
+        "evidence": "total cost of the pizzas refers to SUM(cost) where expense_description = 'Pizza'",
+        "SQL": "SELECT\n  SUM(`cost`)\nFROM `expense`\nWHERE\n  `expense_description` = 'Pizza'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1362,
+        "db_id": "student_club",
+        "question": "How many cities are there in Orange County, Virginia?",
+        "evidence": "Orange County is the county name, Virginia is the state name",
+        "SQL": "SELECT\n  COUNT(`city`)\nFROM `zip_code`\nWHERE\n  `county` = 'Orange County' AND `state` = 'Virginia'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1368,
+        "db_id": "student_club",
+        "question": "What does the person with the phone number \"809-555-3360\" major in?",
+        "evidence": "major in refers to major_name",
+        "SQL": "SELECT\n  `T2`.`major_name`\nFROM `member` AS `T1`\nINNER JOIN `major` AS `T2`\n  ON `T1`.`link_to_major` = `T2`.`major_id`\nWHERE\n  `T1`.`phone` = '809-555-3360'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1371,
+        "db_id": "student_club",
+        "question": "How many members attended the \"Women's Soccer\" event?",
+        "evidence": "'Women's Soccer' is the event name;",
+        "SQL": "SELECT\n  COUNT(`T2`.`link_to_member`)\nFROM `event` AS `T1`\nINNER JOIN `attendance` AS `T2`\n  ON `T1`.`event_id` = `T2`.`link_to_event`\nWHERE\n  `T1`.`event_name` = 'Women''s Soccer'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1378,
+        "db_id": "student_club",
+        "question": "What is the highest amount of budget spend for an event?",
+        "evidence": "highest amount of budget spend refers to MAX(spent)",
+        "SQL": "SELECT\n  MAX(`spent`)\nFROM `budget`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1380,
+        "db_id": "student_club",
+        "question": "What is the total amount of money spent for food?",
+        "evidence": "total amount of money spent refers to SUM(spent); spent for food refers to category = 'Food'",
+        "SQL": "SELECT SUM(spent) FROM budget WHERE category = 'Food'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1389,
+        "db_id": "student_club",
+        "question": "Which event has the lowest cost?",
+        "evidence": "event refers to event_name; lowest cost means MIN(cost)",
+        "SQL": "SELECT\n  `T1`.`event_name`\nFROM `event` AS `T1`\nINNER JOIN `budget` AS `T2`\n  ON `T1`.`event_id` = `T2`.`link_to_event`\nINNER JOIN `expense` AS `T3`\n  ON `T2`.`budget_id` = `T3`.`link_to_budget`\nORDER BY\n  `T3`.`cost`\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1392,
+        "db_id": "student_club",
+        "question": "Indicate the top source of funds received in September 2019 based on their amount.",
+        "evidence": "top source funds refers to MAX(source); September 2019 means date_received BETWEEN '2019-09-01' and '2019-09-30'",
+        "SQL": "SELECT\n  `source`\nFROM `income`\nWHERE\n  `date_received` BETWEEN '2019-09-01' AND '2019-09-30'\nORDER BY\n  `source` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1394,
+        "db_id": "student_club",
+        "question": "How many members of the Student_Club have major in 'Physics Teaching'?",
+        "evidence": "'Physics Teaching' is the major_name;",
+        "SQL": "SELECT\n  COUNT(`T2`.`member_id`)\nFROM `major` AS `T1`\nINNER JOIN `member` AS `T2`\n  ON `T1`.`major_id` = `T2`.`link_to_major`\nWHERE\n  `T1`.`major_name` = 'Physics Teaching'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1409,
+        "db_id": "student_club",
+        "question": "Mention the total expense used on 8/20/2019.",
+        "evidence": "total expense refers SUM(cost) where expense_date = '2019-08-20'",
+        "SQL": "SELECT\n  SUM(`cost`)\nFROM `expense`\nWHERE\n  `expense_date` = '2019-08-20'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1410,
+        "db_id": "student_club",
+        "question": "List out the full name and total cost that member id \"rec4BLdZHS2Blfp4v\" incurred?",
+        "evidence": "full name refers to first_name, last name",
+        "SQL": "SELECT\n  `T1`.`first_name`,\n  `T1`.`last_name`,\n  SUM(`T2`.`cost`)\nFROM `member` AS `T1`\nINNER JOIN `expense` AS `T2`\n  ON `T1`.`member_id` = `T2`.`link_to_member`\nWHERE\n  `T1`.`member_id` = 'rec4BLdZHS2Blfp4v'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1411,
+        "db_id": "student_club",
+        "question": "State what kind of expenses that Sacha Harrison incurred?",
+        "evidence": "kind of expenses refers to expense_description; Sacha Harrison is the full name; full name refers to first_name, last_name;",
+        "SQL": "SELECT\n  `T2`.`expense_description`\nFROM `member` AS `T1`\nINNER JOIN `expense` AS `T2`\n  ON `T1`.`member_id` = `T2`.`link_to_member`\nWHERE\n  `T1`.`first_name` = 'Sacha' AND `T1`.`last_name` = 'Harrison'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1422,
+        "db_id": "student_club",
+        "question": "State the category of events were held at MU 215.",
+        "evidence": "'MU 215' is the location of event; ",
+        "SQL": "SELECT DISTINCT\n  `T2`.`category`\nFROM `event` AS `T1`\nINNER JOIN `budget` AS `T2`\n  ON `T1`.`event_id` = `T2`.`link_to_event`\nWHERE\n  `T1`.`location` = 'MU 215'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1153,
+        "db_id": "thrombosis_prediction",
+        "question": "What is the disease patient '30609' diagnosed with. List all the date of laboratory tests done for this patient.",
+        "evidence": "'30609' is the Patient ID; disease means Diagnosis",
+        "SQL": "SELECT\n  `T1`.`Diagnosis`,\n  `T2`.`Date`\nFROM `Patient` AS `T1`\nINNER JOIN `Laboratory` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nWHERE\n  `T1`.`ID` = 30609",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1155,
+        "db_id": "thrombosis_prediction",
+        "question": "List the patient ID, sex and birthday of patient with LDH beyond normal range.",
+        "evidence": "LDH beyond normal range refers to LDH > '500';",
+        "SQL": "SELECT DISTINCT\n  `T1`.`ID`,\n  `T1`.`SEX`,\n  `T1`.`Birthday`\nFROM `Patient` AS `T1`\nINNER JOIN `Laboratory` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nWHERE\n  `T2`.`LDH` > 500",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1157,
+        "db_id": "thrombosis_prediction",
+        "question": "For patients with severe degree of thrombosis, list their ID, sex and disease the patient is diagnosed with.",
+        "evidence": "severe degree of thrombosis refers to thrombosis = 2; disease refers to diagnosis;",
+        "SQL": "SELECT DISTINCT\n  `T1`.`ID`,\n  `T1`.`SEX`,\n  `T1`.`Diagnosis`\nFROM `Patient` AS `T1`\nINNER JOIN `Examination` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nWHERE\n  `T2`.`Thrombosis` = 2",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1166,
+        "db_id": "thrombosis_prediction",
+        "question": "What are the symptoms observed by the youngest patient to ever did a medical examination? Identify their diagnosis.",
+        "evidence": "The larger the birthday value, the younger the person is, and vice versa; symptoms observed refers to the symptoms is not NULL",
+        "SQL": "SELECT\n  `T2`.`Symptoms`,\n  `T1`.`Diagnosis`\nFROM `Patient` AS `T1`\nINNER JOIN `Examination` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nWHERE\n  NOT `T2`.`Symptoms` IS NULL\nORDER BY\n  `T1`.`Birthday` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1198,
+        "db_id": "thrombosis_prediction",
+        "question": "How many female patients were given an APS diagnosis?",
+        "evidence": "female refers to SEX = 'F'; APS diagnosis refers to Diagnosis='APS'",
+        "SQL": "SELECT\n  COUNT(`ID`)\nFROM `Patient`\nWHERE\n  `SEX` = 'F' AND `Diagnosis` = 'APS'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1220,
+        "db_id": "thrombosis_prediction",
+        "question": "Provide all ID, sex and birthday of patients whose urea nitrogen (UN) just within the borderline of passing?",
+        "evidence": "urea nitrogen (UN) just within the borderline of passing refers to UN = 29; ",
+        "SQL": "SELECT DISTINCT\n  `T1`.`ID`,\n  `T1`.`SEX`,\n  `T1`.`Birthday`\nFROM `Patient` AS `T1`\nINNER JOIN `Laboratory` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nWHERE\n  `T2`.`UN` = 29",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1251,
+        "db_id": "thrombosis_prediction",
+        "question": "How many patients with an Ig G higher than normal?",
+        "evidence": "Ig G higher than normal refers to IGG >= 2000; Should consider DISTINCT in the final result;",
+        "SQL": "SELECT\n  COUNT(DISTINCT `T1`.`ID`)\nFROM `Patient` AS `T1`\nINNER JOIN `Laboratory` AS `T2`\n  ON `T1`.`ID` = `T2`.`ID`\nINNER JOIN `Examination` AS `T3`\n  ON `T3`.`ID` = `T2`.`ID`\nWHERE\n  `T2`.`IGG` >= 2000",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1035,
+        "db_id": "european_football_2",
+        "question": "Give the team_fifa_api_id of teams with more than 50 but less than 60 build-up play speed.",
+        "evidence": "teams with more than 50 but less than 60 build-up play speed refers to buildUpPlaySpeed >50 AND buildUpPlaySpeed <60; ",
+        "SQL": "SELECT DISTINCT\n  `team_fifa_api_id`\nFROM `Team_Attributes`\nWHERE\n  `buildUpPlaySpeed` > 50 AND `buildUpPlaySpeed` < 60",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1039,
+        "db_id": "european_football_2",
+        "question": "Find the average number of long-shot done by Ahmed Samir Farag.",
+        "evidence": "average number of long shot = DIVIDE(SUM(long_shots), COUNT(player_fifa_api_id));",
+        "SQL": "SELECT\n  CAST(SUM(`t2`.`long_shots`) AS DOUBLE) / COUNT(`t2`.`date`)\nFROM `Player` AS `t1`\nINNER JOIN `Player_Attributes` AS `t2`\n  ON `t1`.`player_api_id` = `t2`.`player_api_id`\nWHERE\n  `t1`.`player_name` = 'Ahmed Samir Farag'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1044,
+        "db_id": "european_football_2",
+        "question": "List the football players with a birthyear of 1970 and a birthmonth of October.",
+        "evidence": "players with a birthyear of 1970 and a birthmonth of October refers to substr(birthday,1,7) AS 'year-month',WHERE year = '1970' AND month = '10';",
+        "SQL": "SELECT\n  `player_name`\nFROM `Player`\nWHERE\n  SUBSTR(`birthday`, 1, 7) = '1970-10'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1048,
+        "db_id": "european_football_2",
+        "question": "What is the overall rating of the football player Gabriel Tamas in year 2011?",
+        "evidence": "in year 2011 refers to strftime('%Y', date) = '2011';",
+        "SQL": "SELECT  `t2`.`overall_rating` FROM `Player` AS `t1`\nINNER JOIN `Player_Attributes` AS `t2`\n  ON `t1`.`player_api_id` = `t2`.`player_api_id` WHERE  `t1`.`player_name` = 'Gabriel Tamas'  AND DATE_FORMAT(CAST(`t2`.`date` AS DATETIME), '%Y') = '2011'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1078,
+        "db_id": "european_football_2",
+        "question": "Which player is older, Aaron Lennon or Abdelaziz Barrada?",
+        "evidence": "The larger the birthday value, the younger the person is, and vice versa;",
+        "SQL": "SELECT\n  `player_name`\nFROM `Player`\nWHERE\n  `player_name` IN ('Aaron Lennon', 'Abdelaziz Barrada')\nORDER BY\n  `birthday` ASC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1079,
+        "db_id": "european_football_2",
+        "question": "Which player is the tallest?",
+        "evidence": "tallest player refers to MAX(height);",
+        "SQL": "SELECT\n  `player_name`\nFROM `Player`\nORDER BY\n  `height` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1092,
+        "db_id": "european_football_2",
+        "question": "Give the name of the league had the most matches in the 2008/2009 season?",
+        "evidence": "league that had the most matches in the 2008/2009 season refers to MAX(league_name WHERE season = '2008/2009');",
+        "SQL": "SELECT `t1`.`name` FROM `League` AS `t1`JOIN `Match` AS `t2` ON `t1`.`id` = `t2`.`league_id` WHERE  `t2`.`season` = '2008/2009' GROUP BY  `t1`.`name` HAVING COUNT(`t2`.`id`) = (SELECT MAX(match_count) FROM (SELECT COUNT(`t2`.`id`) AS match_count FROM `Match` AS `t2` WHERE `t2`.`season` = '2008/2009' GROUP BY  `t2`.`league_id`) AS subquery)",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1116,
+        "db_id": "european_football_2",
+        "question": "List down most tallest players' name.",
+        "evidence": "tallest refers to rank based on the height in descending order; Most tallest players refers to rank = 1 ",
+        "SQL": "SELECT player_name FROM (SELECT player_name, height, DENSE_RANK() OVER (ORDER BY height DESC) as `rank`FROM Player) AS ranked_players WHERE `rank` = 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1122,
+        "db_id": "european_football_2",
+        "question": "State the name of the most strongest player.",
+        "evidence": "strongest players refers to player has MAX(overall_rating)",
+        "SQL": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1133,
+        "db_id": "european_football_2",
+        "question": "How many football players born after the 1990s have the first name \"Aaron\"?",
+        "evidence": "first name \"Aaron\" refers to player_name LIKE 'Aaron%'; born after the 1990s refers to birthday > '1990'",
+        "SQL": "SELECT\n  COUNT(`id`)\nFROM `Player`\nWHERE\n  `birthday` > '1990' AND `player_name` LIKE 'Aaron%'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1134,
+        "db_id": "european_football_2",
+        "question": "What is the difference between players 6 and 23's jumping scores?",
+        "evidence": "difference between players 6 and 23's jumping scores refers to SUBTRACT(jumping AND id = 6,jumping AND id = 23)",
+        "SQL": "SELECT\n  SUM(CASE WHEN `t1`.`id` = 6 THEN `t1`.`jumping` ELSE 0 END) - SUM(CASE WHEN `t1`.`id` = 23 THEN `t1`.`jumping` ELSE 0 END)\nFROM `Player_Attributes` AS `t1`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1144,
+        "db_id": "european_football_2",
+        "question": "Please state the finishing rate and curve score of the player who has the heaviest weight.",
+        "evidence": "finishing rate refer to finishing; curve score refer to curve; heaviest weight refers to MAX(weight)",
+        "SQL": "SELECT\n  `id`,\n  `finishing`,\n  `curve`\nFROM `Player_Attributes`\nWHERE\n  `player_api_id` = (\n    SELECT\n      `player_api_id`\n    FROM `Player`\n    ORDER BY\n      `weight` DESC\n    LIMIT 1\n  )\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1145,
+        "db_id": "european_football_2",
+        "question": "Which top 4 leagues had the most games in the 2015-2016 season?",
+        "evidence": "in the 2015-2016 season refers to season = '2015/2016'; league with most games refers to League.name where MAX(COUNT(id)); ",
+        "SQL": "SELECT\n  `t1`.`name`\nFROM `League` AS `t1`\nINNER JOIN `Match` AS `t2`\n  ON `t1`.`id` = `t2`.`league_id`\nWHERE\n  `t2`.`season` = '2015/2016'\nGROUP BY\n  `t1`.`name`\nORDER BY\n  COUNT(`t2`.`id`) DESC\nLIMIT 4",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 1147,
+        "db_id": "european_football_2",
+        "question": "Please name one player whose overall strength is the greatest.",
+        "evidence": "overall strength is the greatest refers to MAX(overall_rating)",
+        "SQL": "SELECT DISTINCT\n  `t1`.`player_name`\nFROM `Player` AS `t1`\nINNER JOIN `Player_Attributes` AS `t2`\n  ON `t1`.`player_api_id` = `t2`.`player_api_id`\nWHERE\n  `t2`.`overall_rating` = (\n    SELECT\n      MAX(`overall_rating`)\n    FROM `Player_Attributes`\n  )",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 847,
+        "db_id": "formula_1",
+        "question": "What is the surname of the driver with the best lap time in race number 19 in the second qualifying period?",
+        "evidence": "race number refers to raceId; second qualifying period refers to q2; best lap time refers to MIN(q2);",
+        "SQL": "SELECT\n  `T2`.`surname`\nFROM `qualifying` AS `T1`\nINNER JOIN `drivers` AS `T2`\n  ON `T2`.`driverId` = `T1`.`driverId`\nWHERE\n  `T1`.`raceId` = 19\nORDER BY\n  `T1`.`q2` ASC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 850,
+        "db_id": "formula_1",
+        "question": "Please give the name of the race held on the circuits in Germany.",
+        "evidence": "Germany is a name of country;",
+        "SQL": "SELECT DISTINCT\n  `T2`.`name`\nFROM `circuits` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T2`.`circuitID` = `T1`.`circuitId`\nWHERE\n  `T1`.`country` = 'Germany'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 854,
+        "db_id": "formula_1",
+        "question": "What is the coordinates location of the circuits for Australian grand prix?",
+        "evidence": "coordinate position/location refers to lat, lng; circuits for Australian grand prix refers to races.name = 'Australian Grand Prix'",
+        "SQL": "SELECT DISTINCT\n  `T1`.`lat`,\n  `T1`.`lng`\nFROM `circuits` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T2`.`circuitID` = `T1`.`circuitId`\nWHERE\n  `T2`.`name` = 'Australian Grand Prix'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 857,
+        "db_id": "formula_1",
+        "question": "Give the coordinate position for Abu Dhabi Grand Prix.",
+        "evidence": "coordinate position/location refers to lat, lng; Abu Dhabi Grand Prix refers to races.name = 'Abu Dhabi Grand Prix'",
+        "SQL": "SELECT DISTINCT\n  `T1`.`lat`,\n  `T1`.`lng`\nFROM `circuits` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T2`.`circuitID` = `T1`.`circuitId`\nWHERE\n  `T2`.`name` = 'Abu Dhabi Grand Prix'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 859,
+        "db_id": "formula_1",
+        "question": "What's Bruno Senna's Q1 result in the qualifying race No. 354?",
+        "evidence": "race number refers to raceId; Bruno Senna refers to the full name of the driver; Full name of the driver refers to drivers.forename and drivers.surname;",
+        "SQL": "SELECT\n  `T1`.`q1`\nFROM `qualifying` AS `T1`\nINNER JOIN `drivers` AS `T2`\n  ON `T2`.`driverId` = `T1`.`driverId`\nWHERE\n  `T1`.`raceId` = 354 AND `T2`.`forename` = 'Bruno' AND `T2`.`surname` = 'Senna'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 861,
+        "db_id": "formula_1",
+        "question": "What is his number of the driver who finished 0:01:54 in the Q3 of qualifying race No.903?",
+        "evidence": "race number refers to raceId; finished 0:0M:SS in the Q3 refers to q3 LIKE 'M:SS%'",
+        "SQL": "SELECT\n  `T2`.`number`\nFROM `qualifying` AS `T1`\nINNER JOIN `drivers` AS `T2`\n  ON `T2`.`driverId` = `T1`.`driverId`\nWHERE\n  `T1`.`raceId` = 903 AND `T1`.`q3` LIKE '1:54%'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 862,
+        "db_id": "formula_1",
+        "question": "For the Bahrain Grand Prix in 2007, how many drivers not finished the game?",
+        "evidence": "Bahrain Grand Prix refers to races.name = 'Bahrain Grand Prix'; drivers who finished the race refers to time is not empty (i.e. time IS NOT NULL);",
+        "SQL": "SELECT\n  COUNT(`T3`.`driverId`)\nFROM `races` AS `T1`\nINNER JOIN `results` AS `T2`\n  ON `T2`.`raceId` = `T1`.`raceId`\nINNER JOIN `drivers` AS `T3`\n  ON `T3`.`driverId` = `T2`.`driverId`\nWHERE\n  `T1`.`year` = 2007 AND `T1`.`name` = 'Bahrain Grand Prix' AND `T2`.`time` IS NULL",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 868,
+        "db_id": "formula_1",
+        "question": "Where is Malaysian Grand Prix held? Give the location coordinates.",
+        "evidence": "location coordinates refers to (lat, lng); Malaysian Grand Prix refers to races.name = 'Malaysian Grand Prix'",
+        "SQL": "SELECT DISTINCT\n  `T1`.`lat`,\n  `T1`.`lng`\nFROM `circuits` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T2`.`circuitID` = `T1`.`circuitId`\nWHERE\n  `T2`.`name` = 'Malaysian Grand Prix'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 872,
+        "db_id": "formula_1",
+        "question": "In the race No. 45, for the driver who had the Q3 time as 0:01:33, what is his abbreviated code?",
+        "evidence": "race number refers to raceId; had the Q3 time as 0:0M:SS refers to q3 LIKE 'M:SS%'",
+        "SQL": "SELECT\n  `T2`.`code`\nFROM `qualifying` AS `T1`\nINNER JOIN `drivers` AS `T2`\n  ON `T2`.`driverId` = `T1`.`driverId`\nWHERE\n  `T1`.`raceId` = 45 AND `T1`.`q3` LIKE '1:33%'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 875,
+        "db_id": "formula_1",
+        "question": "Show me the season page of year when the race No. 901 took place.",
+        "evidence": "the season page refers to url; race number refers to raceId;",
+        "SQL": "SELECT\n  `T2`.`url`\nFROM `races` AS `T1`\nINNER JOIN `seasons` AS `T2`\n  ON `T2`.`year` = `T1`.`year`\nWHERE\n  `T1`.`raceId` = 901",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 898,
+        "db_id": "formula_1",
+        "question": "How old is the youngest Japanese driver? What is his name?",
+        "evidence": "date of birth refers to drivers.dob; The larger the birthday value, the younger the person is, and vice versa; Japanese refers to nationality = 'Japanese'; age = YEAR(CURRENT_TIMESTAMP) - YEAR(dob);",
+        "SQL": "SELECT\n  DATE_FORMAT(CAST(CURRENT_TIMESTAMP() AS DATETIME), '%Y') - DATE_FORMAT(CAST(`dob` AS DATETIME), '%Y'),\n  `forename`,\n  `surname`\nFROM `drivers`\nWHERE\n  `nationality` = 'Japanese'\nORDER BY\n  `dob` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 901,
+        "db_id": "formula_1",
+        "question": "Name the races along with its circuit name and location for f1 races hosted in September 2005.",
+        "evidence": "in September 2005 refers to MONTH(date) = 9 and YEAR(date) = 2005",
+        "SQL": "SELECT DISTINCT\n  `T2`.`name`,\n  `T1`.`name`,\n  `T1`.`location`\nFROM `circuits` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T2`.`circuitID` = `T1`.`circuitId`\nWHERE\n  `T2`.`year` = 2005 AND DATE_FORMAT(CAST(`T2`.`date` AS DATETIME), '%m') = '09'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 902,
+        "db_id": "formula_1",
+        "question": "Which race was Alex Yoong in when he was in track number less than 20?",
+        "evidence": "Alex Yoong refers to the full name of the driver; Full name of the driver refers to drivers.forename and drivers.surname;track number less than 10 refers to position < 20",
+        "SQL": "SELECT\n  `T1`.`name`\nFROM `races` AS `T1`\nINNER JOIN `driverStandings` AS `T2`\n  ON `T2`.`raceId` = `T1`.`raceId`\nINNER JOIN `drivers` AS `T3`\n  ON `T3`.`driverId` = `T2`.`driverId`\nWHERE\n  `T3`.`forename` = 'Alex' AND `T3`.`surname` = 'Yoong' AND `T2`.`position` < 20",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 910,
+        "db_id": "formula_1",
+        "question": "What's the location coordinates of Silverstone Circuit?",
+        "evidence": "location coordinates refers to (lat, lng); Silverstone Circuit refers to circuits.name = 'Silverstone Circuit'",
+        "SQL": "SELECT\n  `lat`,\n  `lng`\nFROM `circuits`\nWHERE\n  `name` = 'Silverstone Circuit'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 912,
+        "db_id": "formula_1",
+        "question": "What's the reference name of Marina Bay Street Circuit?",
+        "evidence": "reference name refers to circuitRef; Marina Bay Street Circuit refers to circuits.name = 'Marina Bay Street Circuit'",
+        "SQL": "SELECT\n  `circuitRef`\nFROM `circuits`\nWHERE\n  `name` = 'Marina Bay Street Circuit'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 915,
+        "db_id": "formula_1",
+        "question": "Which country is the oldest driver from?",
+        "evidence": "date of birth refers to drivers.dob; The larger the birthday value, the younger the person is, and vice versa;",
+        "SQL": "SELECT\n  `nationality`\nFROM `drivers`\nWHERE\n  NOT `dob` IS NULL\nORDER BY\n  `dob` ASC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 930,
+        "db_id": "formula_1",
+        "question": "In which Formula_1 race did Lewis Hamilton rank the highest?",
+        "evidence": "rank the highest refers to min(rank); Lewis Hamilton refers to the full name of the driver; Full name of the driver refers to drivers.forename and drivers.surname;",
+        "SQL": "SELECT\n  `name`\nFROM `races`\nWHERE\n  `raceId` IN (\n    SELECT\n      `raceId`\n    FROM `results`\n    WHERE\n      `rank` = 1\n      AND `driverId` = (\n        SELECT\n          `driverId`\n        FROM `drivers`\n        WHERE\n          `forename` = 'Lewis' AND `surname` = 'Hamilton'\n      )\n  )",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 937,
+        "db_id": "formula_1",
+        "question": "What's the finish time for the driver who ranked second in 2008's Chinese Grand Prix?",
+        "evidence": "finish time refers to time; Chinese Grand Prix refers to races.name = 'Chinese Grand Prix';",
+        "SQL": "SELECT\n  `T1`.`time`\nFROM `results` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T1`.`raceId` = `T2`.`raceId`\nWHERE\n  `T1`.`rank` = 2 AND `T2`.`name` = 'Chinese Grand Prix' AND `T2`.`year` = 2008",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 945,
+        "db_id": "formula_1",
+        "question": "How many circuits are there in Adelaide, Australia?",
+        "evidence": "Australia is the country; Melbourne is the location of circuit;",
+        "SQL": "SELECT\n  COUNT(`circuitId`)\nFROM `circuits`\nWHERE\n  `location` = 'Adelaide' AND `country` = 'Australia'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 948,
+        "db_id": "formula_1",
+        "question": "What are the maximum points of British constructors?",
+        "evidence": "maximum points = MAX(points); British is a nationality",
+        "SQL": "SELECT\n  MAX(`T1`.`points`)\nFROM `constructorStandings` AS `T1`\nINNER JOIN `constructors` AS `T2`\n  ON `T1`.`constructorId` = `T2`.`constructorId`\nWHERE\n  `T2`.`nationality` = 'British'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 950,
+        "db_id": "formula_1",
+        "question": "Please list the constructor names with 0 points at race 291.",
+        "evidence": "race at 291 refers to raceID = 291;",
+        "SQL": "SELECT\n  `T2`.`name`\nFROM `constructorStandings` AS `T1`\nINNER JOIN `constructors` AS `T2`\n  ON `T1`.`constructorId` = `T2`.`constructorId`\nWHERE\n  `T1`.`points` = 0 AND `T1`.`raceId` = 291",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 951,
+        "db_id": "formula_1",
+        "question": "How many Japanese constructors have 0 points in 2 races?",
+        "evidence": "2 races refers to COUNT(raceID) = 2; Japanese refers to constructors.nationality = 'Japanese';",
+        "SQL": "SELECT\n  COUNT(`T1`.`raceId`)\nFROM `constructorStandings` AS `T1`\nINNER JOIN `constructors` AS `T2`\n  ON `T1`.`constructorId` = `T2`.`constructorId`\nWHERE\n  `T1`.`points` = 0 AND `T2`.`nationality` = 'Japanese'\nGROUP BY\n  `T1`.`constructorId`\nHAVING\n  COUNT(`raceId`) = 2",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 959,
+        "db_id": "formula_1",
+        "question": "What is the fastest lap number of the champion in 2009?",
+        "evidence": "in 2009 refers to year = 2009; Only the time of the champion shows in the format of \"hour: minutes: seconds.millionsecond\"",
+        "SQL": "SELECT\n  `T1`.`fastestLap`\nFROM `results` AS `T1`\nINNER JOIN `races` AS `T2`\n  ON `T1`.`raceId` = `T2`.`raceId`\nWHERE\n  `T2`.`year` = 2009 AND `T1`.`time` LIKE '_:%:__.___'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 964,
+        "db_id": "formula_1",
+        "question": "List out the code for drivers who have nationality in American.",
+        "evidence": "nationality = 'American'",
+        "SQL": "SELECT `code` FROM `drivers` WHERE `Nationality` = 'American'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 967,
+        "db_id": "formula_1",
+        "question": "State code numbers of top 3 yougest drivers. How many Netherlandic drivers among them?",
+        "evidence": "youngest driver refers to Max (year(dob)); Netherlandic and Dutch refer to the same country",
+        "SQL": "SELECT COUNT(*) FROM (SELECT `T1`.`nationality` FROM `drivers` AS `T1` ORDER BY `T1`.`dob` DESC LIMIT 3) AS `T3` WHERE `T3`.`nationality` = 'Dutch'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 971,
+        "db_id": "formula_1",
+        "question": "Please state the reference name of the oldest German driver.",
+        "evidence": "oldest refers to MIN(year(dob)); reference names appear in drverRef.",
+        "SQL": "SELECT `driverRef` FROM `drivers` WHERE `nationality` = 'German' ORDER BY `dob` ASC LIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 977,
+        "db_id": "formula_1",
+        "question": "From race no. 50 to 100, how many finishers have been disqualified?",
+        "evidence": "disqualified refers to statusID = 2, finisher refers to time! = null; race no. refers to raceId; raceId > 50 and raceId < 100;",
+        "SQL": "SELECT\n  SUM(CASE WHEN NOT `time` IS NULL THEN 1 ELSE 0 END)\nFROM `results`\nWHERE\n  `statusId` = 2 AND `raceID` < 100 AND `raceId` > 50",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 978,
+        "db_id": "formula_1",
+        "question": "How many times the circuits were held in Austria? Please give their location and coordinates.",
+        "evidence": "location coordinates refers to (lat,lng); Austria refers to country = 'Austria';",
+        "SQL": "SELECT DISTINCT\n  `location`,\n  `lat`,\n  `lng`\nFROM `circuits`\nWHERE\n  `country` = 'Austria'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 717,
+        "db_id": "superhero",
+        "question": "Please list all the superpowers of 3-D Man.",
+        "evidence": "3-D Man refers to superhero_name = '3-D Man'; superpowers refers to power_name",
+        "SQL": "SELECT  `T3`.`power_name` FROM `superhero` AS `T1` INNER JOIN `hero_power` AS `T2`  ON `T1`.`id` = `T2`.`hero_id` INNER JOIN `superpower` AS `T3`  ON `T2`.`power_id` = `T3`.`id` WHERE  `T1`.`superhero_name` = '3-D Man'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 737,
+        "db_id": "superhero",
+        "question": "What is Copycat's race?",
+        "evidence": "Copycat is the superhero_name;",
+        "SQL": "SELECT\n  `T2`.`race`\nFROM `superhero` AS `T1`\nINNER JOIN `race` AS `T2`\n  ON `T1`.`race_id` = `T2`.`id`\nWHERE\n  `T1`.`superhero_name` = 'Copycat'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 738,
+        "db_id": "superhero",
+        "question": "Which superheroes have a durability attribute value of less than 50?",
+        "evidence": "durability of less than 50 refers to attribute_name = 'Durability' AND attribute_value < 50",
+        "SQL": "SELECT\n  `superhero_name`\nFROM `superhero` AS `T1`\nWHERE\n  EXISTS(\n    SELECT\n      1\n    FROM `hero_attribute` AS `T2`\n    INNER JOIN `attribute` AS `T3`\n      ON `T2`.`attribute_id` = `T3`.`id`\n    WHERE\n      `T3`.`attribute_name` = 'Durability'\n      AND `T2`.`attribute_value` < 50\n      AND `T1`.`id` = `T2`.`hero_id`\n  )",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 745,
+        "db_id": "superhero",
+        "question": "Give the publisher ID of Star Trek.",
+        "evidence": "Star Trek is the publisher_name;",
+        "SQL": "SELECT\n  `id`\nFROM `publisher`\nWHERE\n  `publisher_name` = 'Star Trek'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 747,
+        "db_id": "superhero",
+        "question": "What is the total number of superheroes without full name?",
+        "evidence": "superheroes without full name refers to full_name IS NULL",
+        "SQL": "SELECT\n  COUNT(`id`)\nFROM `superhero`\nWHERE\n  `full_name` IS NULL",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 750,
+        "db_id": "superhero",
+        "question": "What is the average weight of all female superheroes?",
+        "evidence": "female refers to gender = 'Female'; average weight refers to AVG(weight_kg)",
+        "SQL": "SELECT\n  AVG(`T1`.`weight_kg`)\nFROM `superhero` AS `T1`\nINNER JOIN `gender` AS `T2`\n  ON `T1`.`gender_id` = `T2`.`id`\nWHERE\n  `T2`.`gender` = 'Female'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 764,
+        "db_id": "superhero",
+        "question": "What are the superpowers of heroes with ID 1?",
+        "evidence": "superpowers refers to power_name; heroes with ID 1 refers to hero_id = 1;",
+        "SQL": "SELECT DISTINCT\n  `T2`.`power_name`\nFROM `hero_power` AS `T1`\nINNER JOIN `superpower` AS `T2`\n  ON `T1`.`power_id` = `T2`.`id`\nWHERE\n  `T1`.`hero_id` = 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 765,
+        "db_id": "superhero",
+        "question": "How many heroes have stealth power?",
+        "evidence": "stealth power refers to power_name = 'Stealth';",
+        "SQL": "SELECT\n  COUNT(`T1`.`hero_id`)\nFROM `hero_power` AS `T1`\nINNER JOIN `superpower` AS `T2`\n  ON `T1`.`power_id` = `T2`.`id`\nWHERE\n  `T2`.`power_name` = 'Stealth'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 779,
+        "db_id": "superhero",
+        "question": "How many powers does Amazo hero have?",
+        "evidence": "Amazo hero refers to superhero_name = 'Amazo';",
+        "SQL": "SELECT\n  COUNT(`T1`.`power_id`)\nFROM `hero_power` AS `T1`\nINNER JOIN `superhero` AS `T2`\n  ON `T1`.`hero_id` = `T2`.`id`\nWHERE\n  `T2`.`superhero_name` = 'Amazo'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 781,
+        "db_id": "superhero",
+        "question": "Provide the heights of the heroes whose eye colours are amber.",
+        "evidence": "heights of the heroes refers to height_cm; eye colours are amber refers to colour.colour = 'Amber' WHERE eye_colour_id = colour.id;",
+        "SQL": "SELECT\n  `T1`.`height_cm`\nFROM `superhero` AS `T1`\nINNER JOIN `colour` AS `T2`\n  ON `T1`.`eye_colour_id` = `T2`.`id`\nWHERE\n  `T2`.`colour` = 'Amber'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 785,
+        "db_id": "superhero",
+        "question": "Describe the names of neutral alignment superheroes.",
+        "evidence": "names of superheroes refers to superhero_name; neutral alignment refers to alignment = 'Neutral';",
+        "SQL": "SELECT\n  `T1`.`superhero_name`\nFROM `superhero` AS `T1`\nINNER JOIN `alignment` AS `T2`\n  ON `T1`.`alignment_id` = `T2`.`id`\nWHERE\n  `T2`.`alignment` = 'Neutral'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 791,
+        "db_id": "superhero",
+        "question": "Calculate the average height for all superhero.",
+        "evidence": "average = DIVIDE(SUM(height_cm), COUNT(all heros));",
+        "SQL": "SELECT\n  CAST(SUM(`height_cm`) AS DOUBLE) / COUNT(`id`)\nFROM `superhero`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 792,
+        "db_id": "superhero",
+        "question": "What is Abomination's superpower?",
+        "evidence": "Abomination refers to superhero_name = 'Abomination'; superpower refers to power_name;",
+        "SQL": "SELECT\n  `T3`.`power_name`\nFROM `superhero` AS `T1`\nINNER JOIN `hero_power` AS `T2`\n  ON `T1`.`id` = `T2`.`hero_id`\nINNER JOIN `superpower` AS `T3`\n  ON `T2`.`power_id` = `T3`.`id`\nWHERE\n  `T1`.`superhero_name` = 'Abomination'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 806,
+        "db_id": "superhero",
+        "question": "Provide the eye colour of the superhero who has Karen Beecher-Duncan as their full name.",
+        "evidence": "eye colour refers to colour.colour where eye_colour_id = colour.id; Karen Beecher-Duncan is the full name of superhero;",
+        "SQL": "SELECT\n  `T2`.`colour`\nFROM `superhero` AS `T1`\nINNER JOIN `colour` AS `T2`\n  ON `T1`.`eye_colour_id` = `T2`.`id`\nWHERE\n  `T1`.`full_name` = 'Karen Beecher-Duncan'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 531,
+        "db_id": "codebase_community",
+        "question": "Which user has a higher reputation, Harlan or Jarrod Dixon?",
+        "evidence": "\"Harlan\" and \"Jarrod Dixon\" are both DisplayName; highest reputation refers to Max(Reputation)",
+        "SQL": "SELECT\n  `DisplayName`\nFROM `users`\nWHERE\n  `DisplayName` IN ('Harlan', 'Jarrod Dixon')\n  AND `Reputation` = (\n    SELECT\n      MAX(`Reputation`)\n    FROM `users`\n    WHERE\n      `DisplayName` IN ('Harlan', 'Jarrod Dixon')\n  )",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 532,
+        "db_id": "codebase_community",
+        "question": "Please list the display names of all the users whose accounts were created in the year 2011.",
+        "evidence": "account created in the year 2011 refers to year(CreationDate) = 2011",
+        "SQL": "SELECT\n  `DisplayName`\nFROM `users`\nWHERE\n  DATE_FORMAT(CAST(`CreationDate` AS DATETIME), '%Y') = '2011'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 533,
+        "db_id": "codebase_community",
+        "question": "How many users last accessed the website after 2014/9/1?",
+        "evidence": "last accessed after 2014/9/1 refers to LastAccessDate > '2014-09-01'",
+        "SQL": "SELECT\n  COUNT(`Id`)\nFROM `users`\nWHERE\n  DATE(`LastAccessDate`) > '2014-09-01'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 539,
+        "db_id": "codebase_community",
+        "question": "Who is the owner of the post \"Eliciting priors from experts\"?",
+        "evidence": "\"Eliciting priors from experts\" is the Title of post; owner refers to DisplayName",
+        "SQL": "SELECT\n  `T2`.`DisplayName`\nFROM `posts` AS `T1`\nINNER JOIN `users` AS `T2`\n  ON `T1`.`OwnerUserId` = `T2`.`Id`\nWHERE\n  `T1`.`Title` = 'Eliciting priors from experts'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 537,
+        "db_id": "codebase_community",
+        "question": "How many posts does the user csgillespie own?",
+        "evidence": "\"csgillespie\" is the DisplayName of user",
+        "SQL": "SELECT\n  COUNT(`T1`.`id`)\nFROM `posts` AS `T1`\nINNER JOIN `users` AS `T2`\n  ON `T1`.`OwnerUserId` = `T2`.`Id`\nWHERE\n  `T2`.`DisplayName` = 'csgillespie'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 547,
+        "db_id": "codebase_community",
+        "question": "Among the posts owned by an elder user, how many of them have a score of over 19?",
+        "evidence": "elder users refers to Age > 65; Score of over 19 refers to Score > = 20",
+        "SQL": "SELECT\n  COUNT(`T1`.`Id`)\nFROM `posts` AS `T1`\nINNER JOIN `users` AS `T2`\n  ON `T1`.`OwnerUserId` = `T2`.`Id`\nWHERE\n  `T1`.`Score` >= 20 AND `T2`.`Age` > 65",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 549,
+        "db_id": "codebase_community",
+        "question": "From which post is the tag \"bayesian\" excerpted from? Please give the body of the post.",
+        "evidence": "\"bayesian\" is the TagName; excerpt from refers to ExcerptPostId",
+        "SQL": "SELECT\n  `T2`.`Body`\nFROM `tags` AS `T1`\nINNER JOIN `posts` AS `T2`\n  ON `T2`.`Id` = `T1`.`ExcerptPostId`\nWHERE\n  `T1`.`TagName` = 'bayesian'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 555,
+        "db_id": "codebase_community",
+        "question": "What is the average score of the posts owned by the user csgillespie?",
+        "evidence": "\"csgillespie\" is the DisplayName of user; average score refers to AVG(Score)",
+        "SQL": "SELECT\n  AVG(`T1`.`Score`)\nFROM `posts` AS `T1`\nINNER JOIN `users` AS `T2`\n  ON `T1`.`OwnerUserId` = `T2`.`Id`\nWHERE\n  `T2`.`DisplayName` = 'csgillespie'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 567,
+        "db_id": "codebase_community",
+        "question": "For the user with the display name of \"Tiago Pasqualini\", how many posts did he/she own?",
+        "evidence": "\"Tiago Pasqualini\" is the DisplayName;",
+        "SQL": "SELECT\n  COUNT(`T1`.`Id`)\nFROM `users` AS `T1`\nINNER JOIN `posts` AS `T2`\n  ON `T1`.`Id` = `T2`.`OwnerUserId`\nWHERE\n  `T1`.`DisplayName` = 'Tiago Pasqualini'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 568,
+        "db_id": "codebase_community",
+        "question": "Provide the display name of the user who made the vote No.6347.",
+        "evidence": "vote no. 6347 refers to Id = '6347'",
+        "SQL": "SELECT\n  `T1`.`DisplayName`\nFROM `users` AS `T1`\nINNER JOIN `votes` AS `T2`\n  ON `T1`.`Id` = `T2`.`UserId`\nWHERE\n  `T2`.`Id` = 6347",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 573,
+        "db_id": "codebase_community",
+        "question": "Write the contents of comments with a score of 17.",
+        "evidence": "score of 17 refers to Score = 17; contents of comments refers to Text",
+        "SQL": "SELECT\n  `Text`\nFROM `comments`\nWHERE\n  `Score` = 17",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 576,
+        "db_id": "codebase_community",
+        "question": "Name the user that commented 'thank you user93!'",
+        "evidence": "\"thank you user93\" is the Text of comment; user refers to DisplayName",
+        "SQL": "SELECT\n  `T1`.`DisplayName`\nFROM `users` AS `T1`\nINNER JOIN `comments` AS `T2`\n  ON `T1`.`Id` = `T2`.`UserId`\nWHERE\n  `T2`.`Text` = 'thank you user93!'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 592,
+        "db_id": "codebase_community",
+        "question": "How many users are awarded with more than 5 badges?",
+        "evidence": "more than 5 badges refers to Count (Name) > 5; user refers to UserId",
+        "SQL": "SELECT\n  COUNT(`UserId`)\nFROM (\n  SELECT\n    `UserId`,\n    COUNT(`Name`) AS `num`\n  FROM `badges`\n  GROUP BY\n    `UserId`\n) AS `T`\nWHERE\n  `T`.`num` > 5",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 629,
+        "db_id": "codebase_community",
+        "question": "Calculate the ratio of votes in 2010 and 2011.",
+        "evidence": "DIVIDE(COUNT(Id where YEAR(CreationDate) = 2010), COUNT(Id where YEAR(CreationDate) = 2011)) FROM votes;",
+        "SQL": "SELECT\n  CAST(SUM(\n    CASE\n      WHEN DATE_FORMAT(CAST(`CreationDate` AS DATETIME), '%Y') = '2010'\n      THEN 1\n      ELSE 0\n    END\n  ) AS DOUBLE) / SUM(\n    CASE\n      WHEN DATE_FORMAT(CAST(`CreationDate` AS DATETIME), '%Y') = '2011'\n      THEN 1\n      ELSE 0\n    END\n  )\nFROM `votes`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 669,
+        "db_id": "codebase_community",
+        "question": "When did 'chl' cast its first vote in a post?",
+        "evidence": "DisplayName = 'chl'; cast its first vote refers to MIN(CreationDate);",
+        "SQL": "SELECT\n  `T2`.`CreationDate`\nFROM `users` AS `T1`\nINNER JOIN `votes` AS `T2`\n  ON `T1`.`Id` = `T2`.`UserId`\nWHERE\n  `T1`.`DisplayName` = 'chl'\nORDER BY\n  `T2`.`CreationDate`\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 671,
+        "db_id": "codebase_community",
+        "question": "What is the display name of the user who acquired the first Autobiographer badge?",
+        "evidence": "Autobiographer is the name of the badge; acquired the first refers to MIN(Date);",
+        "SQL": "SELECT\n  `T1`.`DisplayName`\nFROM `users` AS `T1`\nINNER JOIN `badges` AS `T2`\n  ON `T1`.`Id` = `T2`.`UserId`\nWHERE\n  `T2`.`Name` = 'Autobiographer'\nORDER BY\n  `T2`.`Date`\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 678,
+        "db_id": "codebase_community",
+        "question": "Which post by Harvey Motulsky has the most views? Please give the id and title of this post.",
+        "evidence": "DisplayName = 'Harvey Motulsky'; the most views refer to MAX(ViewCount);",
+        "SQL": "SELECT\n  `T2`.`Id`,\n  `T2`.`Title`\nFROM `users` AS `T1`\nINNER JOIN `posts` AS `T2`\n  ON `T1`.`Id` = `T2`.`OwnerUserId`\nWHERE\n  `T1`.`DisplayName` = 'Harvey Motulsky'\nORDER BY\n  `T2`.`ViewCount` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 687,
+        "db_id": "codebase_community",
+        "question": "How many comments were added to the post with the highest score?",
+        "evidence": "the highest score refers to MAX(Score);",
+        "SQL": "SELECT\n  COUNT(`T2`.`Id`)\nFROM `posts` AS `T1`\nINNER JOIN `comments` AS `T2`\n  ON `T1`.`Id` = `T2`.`PostId`\nGROUP BY\n  `T1`.`Id`\nORDER BY\n  `T1`.`Score` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 704,
+        "db_id": "codebase_community",
+        "question": "What is the excerpt post ID and wiki post ID of the tag named sample?",
+        "evidence": "tag named sample refers to TagName = 'sample';",
+        "SQL": "SELECT\n  `ExcerptPostId`,\n  `WikiPostId`\nFROM `tags`\nWHERE\n  `TagName` = 'sample'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 705,
+        "db_id": "codebase_community",
+        "question": "Give the user's reputation and up vote number of the user that commented \"fine, you win :)\".",
+        "evidence": "Text = 'fine, you win :)';",
+        "SQL": "SELECT\n  `T2`.`Reputation`,\n  `T2`.`UpVotes`\nFROM `comments` AS `T1`\nINNER JOIN `users` AS `T2`\n  ON `T1`.`UserId` = `T2`.`Id`\nWHERE\n  `T1`.`Text` = 'fine, you win :)'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 710,
+        "db_id": "codebase_community",
+        "question": "In posts with 1 comment, how many of the comments have 0 score?",
+        "evidence": "in posts with 1 comment refers to CommentCount = 1;",
+        "SQL": "SELECT\n  COUNT(`T1`.`id`)\nFROM `comments` AS `T1`\nINNER JOIN `posts` AS `T2`\n  ON `T1`.`PostId` = `T2`.`Id`\nWHERE\n  `T2`.`CommentCount` = 1 AND `T2`.`Score` = 0",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 340,
+        "db_id": "card_games",
+        "question": "Which are the cards that have incredibly powerful foils.",
+        "evidence": "incredibly poweful foils refers to cardKingdomFoilId is not null AND cardKingdomId is not null",
+        "SQL": "SELECT\n  `id`\nFROM `cards`\nWHERE\n  NOT `cardKingdomFoilId` IS NULL AND NOT `cardKingdomId` IS NULL",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 341,
+        "db_id": "card_games",
+        "question": "What are the borderless cards available without powerful foils?",
+        "evidence": "borderless' refers to borderColor; poweful foils refers to cardKingdomFoilId paired with cardKingdomId AND cardKingdomId is not null",
+        "SQL": "SELECT\n  `id`\nFROM `cards`\nWHERE\n  `borderColor` = 'borderless'\n  AND (\n    `cardKingdomId` IS NULL OR `cardKingdomId` IS NULL\n  )",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 356,
+        "db_id": "card_games",
+        "question": "How many cards have infinite power?",
+        "evidence": "infinite power refers to power = '*';",
+        "SQL": "SELECT\n  COUNT(*)\nFROM `cards`\nWHERE\n  `power` = '*'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 358,
+        "db_id": "card_games",
+        "question": "What is the border color of card \"Ancestor's Chosen\"?",
+        "evidence": "name of card  = 'Ancestor''s Chosen' ;",
+        "SQL": "SELECT DISTINCT\n  `borderColor`\nFROM `cards`\nWHERE\n  `name` = 'Ancestor''s Chosen'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 366,
+        "db_id": "card_games",
+        "question": "What is the rule of playing card \"Benalish Knight\"?",
+        "evidence": "Benalish Knight' is the name of card; rule of playing card refers to format;",
+        "SQL": "SELECT\n  `T2`.`format`\nFROM `cards` AS `T1`\nINNER JOIN `legalities` AS `T2`\n  ON `T1`.`uuid` = `T2`.`uuid`\nWHERE\n  `T1`.`name` = 'Benalish Knight'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 368,
+        "db_id": "card_games",
+        "question": "What is the percentage of borderless cards?",
+        "evidence": "borderless card refers to borderColor = 'borderless'; percentage = Divide(Count (id) where borderColor = 'borderless', Count(id)) *100",
+        "SQL": "SELECT\n  CAST(SUM(CASE WHEN `borderColor` = 'borderless' THEN 1 ELSE 0 END) AS DOUBLE) * 100 / COUNT(`id`)\nFROM `cards`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 377,
+        "db_id": "card_games",
+        "question": "How many cards with original type of \"Summon - Angel\" have subtype other than \"Angel\"?",
+        "evidence": "subtype other than Angel refers to subtypes is not 'Angel';",
+        "SQL": "SELECT\n  COUNT(`id`)\nFROM `cards`\nWHERE\n  `originalType` = 'Summon - Angel' AND `subtypes` <> 'Angel'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 379,
+        "db_id": "card_games",
+        "question": "What are the cards belong to duel deck a? List the ID.",
+        "evidence": "duel deck a refers to duelDeck = a;",
+        "SQL": "SELECT\n  `id`\nFROM `cards`\nWHERE\n  `duelDeck` = 'a'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 383,
+        "db_id": "card_games",
+        "question": "How many of the banned cards are white border?",
+        "evidence": "banned card refers to status = 'Banned'; white border refers to borderColor = 'white';",
+        "SQL": "SELECT\n  COUNT(`T1`.`id`)\nFROM `cards` AS `T1`\nINNER JOIN `legalities` AS `T2`\n  ON `T1`.`uuid` = `T2`.`uuid`\nWHERE\n  `T2`.`status` = 'Banned' AND `T1`.`borderColor` = 'white'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 414,
+        "db_id": "card_games",
+        "question": "What language is the set of 180 cards that belongs to the Ravnica block translated into?",
+        "evidence": "set of 180 cards refers to baseSetSize = 180",
+        "SQL": "SELECT\n  `T2`.`language`\nFROM `sets` AS `T1`\nINNER JOIN `set_translations` AS `T2`\n  ON `T1`.`code` = `T2`.`setCode`\nWHERE\n  `T1`.`block` = 'Ravnica' AND `T1`.`baseSetSize` = 180",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 422,
+        "db_id": "card_games",
+        "question": "What is the language of the card with the multiverse number 149934?",
+        "evidence": "multiverse number 149934 refers to multiverseid = 149934;",
+        "SQL": "SELECT\n  `language`\nFROM `foreign_data`\nWHERE\n  `multiverseid` = 149934",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 424,
+        "db_id": "card_games",
+        "question": "What proportion of cards do not have a text box with a normal layout?",
+        "evidence": "do not have a text box refers to isTextless = 1; proportion refers to DIVIDE(COUNT(Textless = 1 and layout = 'normal'),COUNT(Textless))*100",
+        "SQL": "SELECT\n  CAST(SUM(CASE WHEN `isTextless` = 1 AND `layout` = 'normal' THEN 1 ELSE 0 END) AS DOUBLE) * 100 / COUNT(*)\nFROM `cards`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 440,
+        "db_id": "card_games",
+        "question": "Which foreign language used by \"A Pedra Fellwar\"?",
+        "evidence": "\"A Pedra Fellwar\" refers to name = 'A Pedra Fellwar'",
+        "SQL": "SELECT DISTINCT\n  `language`\nFROM `foreign_data`\nWHERE\n  `name` = 'A Pedra Fellwar'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 195,
+        "db_id": "toxicology",
+        "question": "What is the most common bond type?",
+        "evidence": "most common bond type refers MAX(COUNT(bond_type))",
+        "SQL": "SELECT\n  `T`.`bond_type`\nFROM (\n  SELECT\n    `bond_type`,\n    COUNT(`bond_id`)\n  FROM `bond`\n  GROUP BY\n    `bond_type`\n  ORDER BY\n    COUNT(`bond_id`) DESC\n  LIMIT 1\n) AS `T`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 200,
+        "db_id": "toxicology",
+        "question": "Find the triple-bonded molecules which are carcinogenic.",
+        "evidence": "triple-bonded molecules refers to bond_type = '#'; carcinogenic refers to label = '+'",
+        "SQL": "SELECT DISTINCT\n  `T2`.`molecule_id`\nFROM `bond` AS `T1`\nINNER JOIN `molecule` AS `T2`\n  ON `T1`.`molecule_id` = `T2`.`molecule_id`\nWHERE\n  `T1`.`bond_type` = '#' AND `T2`.`label` = '+'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 227,
+        "db_id": "toxicology",
+        "question": "What is the percentage of molecules that are carcinogenic? Please provide your answer as a percentage with three decimal places.",
+        "evidence": "label = '+' mean molecules are carcinogenic; percentage = DIVIDE(SUM(label = '+'), COUNT(molecule_id)) as percent",
+        "SQL": "SELECT\n  ROUND(\n    CAST(COUNT(CASE WHEN `T`.`label` = '+' THEN `T`.`molecule_id` ELSE NULL END) AS DOUBLE) * 100 / COUNT(`T`.`molecule_id`),\n    3\n  )\nFROM `molecule` AS `t`",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 239,
+        "db_id": "toxicology",
+        "question": "How many connections does the atom 19 have?",
+        "evidence": "connections refers to bond_id; atom 19 refers to atom_id like 'TR%_19';",
+        "SQL": "SELECT\n  COUNT(`T`.`bond_id`)\nFROM `connected` AS `T`\nWHERE\n  SUBSTR(`T`.`atom_id`, -2) = '19'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 248,
+        "db_id": "toxicology",
+        "question": "What are the atoms of the triple bond with the molecule \"TR041\"?",
+        "evidence": "TR041 is the molecule id; triple bond refers to bond_type = '#';",
+        "SQL": "SELECT\n  `T2`.`atom_id`,\n  `T2`.`atom_id2`\nFROM `atom` AS `T1`\nINNER JOIN `connected` AS `T2`\n  ON `T1`.`atom_id` = `T2`.`atom_id`\nINNER JOIN `bond` AS `T3`\n  ON `T2`.`bond_id` = `T3`.`bond_id`\nWHERE\n  `T3`.`bond_type` = '#' AND `T3`.`molecule_id` = 'TR041'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 5,
+        "db_id": "california_schools",
+        "question": "How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
+        "evidence": "Exclusively virtual refers to Virtual = 'F'",
+        "SQL": "SELECT  COUNT(DISTINCT `T2`.`School`) FROM `satscores` AS `T1` INNER JOIN `schools` AS `T2`  ON `T1`.`cds` = `T2`.`CDSCode` WHERE  `T2`.`Virtual` = 'F' AND `T1`.`AvgScrMath` > 400",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 11,
+        "db_id": "california_schools",
+        "question": "Please list the codes of the schools with a total enrollment of over 500.",
+        "evidence": "Total enrollment can be represented by `Enrollment (K-12)` + `Enrollment (Ages 5-17)`",
+        "SQL": "SELECT\n  `T2`.`CDSCode`\nFROM `schools` AS `T1`\nINNER JOIN `frpm` AS `T2`\n  ON `T1`.`CDSCode` = `T2`.`CDSCode`\nWHERE\n  `T2`.`Enrollment (K-12)` + `T2`.`Enrollment (Ages 5-17)` > 500",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 17,
+        "db_id": "california_schools",
+        "question": "Rank schools by their average score in Writing where the score is greater than 499, showing their charter numbers.",
+        "evidence": "Valid charter number means the number is not null",
+        "SQL": "SELECT\n  `CharterNum`,\n  `AvgScrWrite`,\n  RANK() OVER (ORDER BY `AvgScrWrite` DESC) AS `WritingScoreRank`\nFROM `schools` AS `T1`\nINNER JOIN `satscores` AS `T2`\n  ON `T1`.`CDSCode` = `T2`.`cds`\nWHERE\n  `T2`.`AvgScrWrite` > 499 AND NOT `CharterNum` IS NULL",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 39,
+        "db_id": "california_schools",
+        "question": "What is the average number of test takers from Fresno schools that opened between 1/1/1980 and 12/31/1980?",
+        "evidence": "between 1/1/1980 and 12/31/1980 means the year = 1980",
+        "SQL": "SELECT\n  AVG(`T1`.`NumTstTakr`)\nFROM `satscores` AS `T1`\nINNER JOIN `schools` AS `T2`\n  ON `T1`.`cds` = `T2`.`CDSCode`\nWHERE\n  DATE_FORMAT(CAST(`T2`.`OpenDate` AS DATETIME), '%Y') = '1980'\n  AND `T2`.`County` = 'Fresno'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 41,
+        "db_id": "california_schools",
+        "question": "List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.",
+        "evidence": "Exclusively virtual refers to Virtual = 'F'; respective counties means PARTITION BY County",
+        "SQL": "SELECT  School FROM ( SELECT T2.School, T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F') ranked_schools WHERE rnk <= 5",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 46,
+        "db_id": "california_schools",
+        "question": "Which state special schools have the highest number of enrollees from grades 1 through 12?",
+        "evidence": "State Special Schools refers to DOC = 31; Grades 1 through 12 means K-12",
+        "SQL": "SELECT\n  `T2`.`School`\nFROM `frpm` AS `T1`\nINNER JOIN `schools` AS `T2`\n  ON `T1`.`CDSCode` = `T2`.`CDSCode`\nWHERE\n  `T2`.`DOC` = 31\nORDER BY\n  `T1`.`Enrollment (K-12)` DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 50,
+        "db_id": "california_schools",
+        "question": "What is the postal street address for the school with the 7th highest Math average? Indicate the school's name.",
+        "evidence": "Postal street and mailing street are synonyms.",
+        "SQL": "SELECT\n  `T2`.`MailStreet`,\n  `T2`.`School`\nFROM `satscores` AS `T1`\nINNER JOIN `schools` AS `T2`\n  ON `T1`.`cds` = `T2`.`CDSCode`\nORDER BY\n  `T1`.`AvgScrMath` DESC\nLIMIT 1\nOFFSET 6",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 82,
+        "db_id": "california_schools",
+        "question": "What is the grade span offered in the school with the highest longitude?",
+        "evidence": "the highest longitude refers to the school with the maximum absolute longitude value.",
+        "SQL": "SELECT\n  `GSoffered`\nFROM `schools`\nORDER BY\n  ABS(`longitude`) DESC\nLIMIT 1",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 92,
+        "db_id": "financial",
+        "question": "List out the no. of districts that have female average salary is more than 6000 but less than 10000?",
+        "evidence": "A11 refers to average salary; Female mapps to gender = 'F'",
+        "SQL": "SELECT\n  COUNT(DISTINCT `T2`.`district_id`)\nFROM `client` AS `T1`\nINNER JOIN `district` AS `T2`\n  ON `T1`.`district_id` = `T2`.`district_id`\nWHERE\n  `T1`.`gender` = 'F' AND `T2`.`A11` BETWEEN 6000 AND 10000",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 112,
+        "db_id": "financial",
+        "question": "For the female client who was born in 1976/1/29, which district did she opened her account?",
+        "evidence": "Female refers to gender = 'F'; A2 refers to district names",
+        "SQL": "SELECT\n  `T1`.`A2`\nFROM `district` AS `T1`\nINNER JOIN `client` AS `T2`\n  ON `T1`.`district_id` = `T2`.`district_id`\nWHERE\n  `T2`.`birth_date` = '1976-01-29' AND `T2`.`gender` = 'F'",
+        "difficulty": "simple"
+    },
+    {
+        "question_id": 159,
+        "db_id": "financial",
+        "question": "List all the withdrawals in cash transactions that the client with the id 3356 makes.",
+        "evidence": "operation = 'VYBER' refers to withdrawal in cash",
+        "SQL": "SELECT\n  `T4`.`trans_id`\nFROM `client` AS `T1`\nINNER JOIN `disp` AS `T2`\n  ON `T1`.`client_id` = `T2`.`client_id`\nINNER JOIN `account` AS `T3`\n  ON `T2`.`account_id` = `T3`.`account_id`\nINNER JOIN `trans` AS `T4`\n  ON `T3`.`account_id` = `T4`.`account_id`\nWHERE\n  `T1`.`client_id` = 3356 AND `T4`.`operation` = 'VYBER'",
+        "difficulty": "simple"
+    }
+]
