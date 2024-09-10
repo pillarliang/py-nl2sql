@@ -94,7 +94,7 @@ class PGVectorWrapper(BaseVectorDB):
             try:
                 create_index_sql = """
                 CREATE INDEX IF NOT EXISTS vector_store_embedding_hnsw_idx 
-                ON vector_store
+                ON {self.table_cls.__tablename__}
                 USING hnsw (embedding vector_cosine_ops);
                 """
                 connection.execute(text(create_index_sql))
@@ -232,14 +232,14 @@ if __name__ == "__main__":
 
     # 定义 VectorStore 模型以匹配 SQL 模式
     class VectorStore(Base):
-        __tablename__ = 'vector_store'
+        __tablename__ = 'aa'
         id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
         content: Mapped[str] = mapped_column(Text)
         additional_metadata: Mapped[dict] = mapped_column(JSON)
         embedding: Mapped[list] = mapped_column(Vector(1536))
 
-    # pgvector_wrapper = PGVectorWrapper(text_chunks=text_chunk, embedding=OpenAIEmbeddings(), db_instance=db_instance)
-    pgvector_wrapper = PGVectorWrapper(table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
+    pgvector_wrapper = PGVectorWrapper(text_chunks=text_chunk, table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
+    # pgvector_wrapper = PGVectorWrapper(table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
     sorted_chunks = pgvector_wrapper.search_for_chunks(query, top_k=2)
     print(sorted_chunks)
 
