@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py_nl2sql"
-version = "0.0.1.dev3"
+version = "0.0.1.dev4"
 description = "A toolkit for converting natural language to SQL statements."
 authors = ["liangzhu <pillarliang21@gmail.com>"]
 license = "MIT"
