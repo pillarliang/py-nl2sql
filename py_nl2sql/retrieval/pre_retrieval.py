@@ -36,3 +36,8 @@ class PreRetrievalService:
         response = cls.llm.get_structured_response(DECOMPOSE_QUERY_FOR_SQL.format(question=query), DecomposeQueryResponse)
         # convert dict to pydantic model
         return DecomposeQueryResponse(**response)
+
+
+if __name__ == "__main__":
+    res = PreRetrievalService.rephrase_sub_queries("What is the average salary of employees in each department?")
+    print(res)
