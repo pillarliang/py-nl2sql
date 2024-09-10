@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py_nl2sql"
-version = "0.0.1.dev4"
+version = "0.0.1.dev6"
 description = "A toolkit for converting natural language to SQL statements."
 authors = ["liangzhu <pillarliang21@gmail.com>"]
 license = "MIT"
@@ -21,7 +21,7 @@ pymysql = "^1.1.1"
 poetry-core = "^1.9.0"
 black = "^24.8.0"
 psycopg = {extras = ["binary"], version = "^3.2.1"}
-pgvector = "^0.3.3"
+pgvector = "^0.3.0"
 jupyter = "^1.1.1"
 
 
