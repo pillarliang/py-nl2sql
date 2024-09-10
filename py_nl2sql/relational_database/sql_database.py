@@ -143,6 +143,11 @@ class SQLDatabase:
         """Return the engine."""
         return self._engine
 
+    @property
+    def inspector(self) -> inspect:
+        """Return the inspector."""
+        return self._inspector
+
     @classmethod
     def from_uri_db(
             cls,

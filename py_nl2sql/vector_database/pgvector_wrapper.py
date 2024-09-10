@@ -4,14 +4,12 @@ Date: 2024-08-22
 Description: SQLAlchemyVectorDB class for building and searching vector index using PostgreSQL and pgvector.
 """
 from langchain_openai import OpenAIEmbeddings
-from sqlalchemy import create_engine, select, text, JSON, Text
+from sqlalchemy import select, text, JSON, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import sessionmaker, mapped_column, Mapped, declarative_base
-from sqlalchemy.schema import Index
+from sqlalchemy.orm import mapped_column, Mapped, declarative_base
 from pgvector.sqlalchemy import Vector
 import uuid
-from typing import List, Tuple, Any, Optional
-import numpy as np
+from typing import List, Tuple, Any, Optional, Type
 import logging
 import os
 
@@ -25,31 +23,14 @@ logger = logging.getLogger(__name__)
 # 定义基类
 Base = declarative_base()
 
-# 从环境变量获取数据库连接信息
-db_instance = rdb_factory(
-    db_type=RDBType.Postgresql,
-    db_name=os.getenv("DB_NAME", "nl2sql"),
-    db_host=os.getenv("DB_HOST", "localhost"),
-    db_user=os.getenv("DB_USER", "liangzhu"),
-    db_password=os.getenv("DB_PASSWORD", ""),
-)
-
-
-# 定义 VectorStore 模型以匹配 SQL 模式
-class VectorStore(Base):
-    __tablename__ = 'vector_store'
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    content: Mapped[str] = mapped_column(Text)
-    additional_metadata: Mapped[dict] = mapped_column(JSON)
-    embedding: Mapped[list] = mapped_column(Vector(1536))
-
 
 class PGVectorWrapper(BaseVectorDB):
     def __init__(
             self,
-            text_chunks: List[str],
+            table_cls: Type[Base],
             embedding: Any,
             db_instance: SQLDatabase,
+            text_chunks: Optional[List[str]] = None,
             index_type: Optional[str] = None,
             similarity_measure: Optional[str] = None,
     ):
@@ -63,20 +44,28 @@ class PGVectorWrapper(BaseVectorDB):
         :param similarity_measure: 相似度度量方法
         """
         self.text_chunks = text_chunks
+        self.table_cls = table_cls
         self.embedding_model = embedding
         self.index_type = index_type
         self.similarity_measure = similarity_measure or "vector_l2_ops"
         self.vector_index = None
         self.db = db_instance
-        self._create_vector_extension()
 
-        # 创建表
-        Base.metadata.create_all(self.db.engine)
-        # 创建索引
-        self._create_index()
+        if self.text_chunks:
+            if not self._is_table_exists():
+                self._create_vector_extension()
+                # 创建表
+                Base.metadata.create_all(self.db.engine)
+                # 创建索引
+                self._create_index()
 
-        # 初始化嵌入
-        self._initialize_embeddings()
+            self._initialize_embeddings()
+        else:
+            if not self._is_table_exists():
+                raise ValueError("当前表不存在，请提供文本块以初始化表格。")
+
+    def _is_table_exists(self) -> bool:
+        return self.db.inspector.has_table(self.table_cls.__tablename__)
 
     def _create_vector_extension(self):
         """初始化 PostgreSQL 扩展。"""
@@ -109,9 +98,12 @@ class PGVectorWrapper(BaseVectorDB):
                 USING hnsw (embedding vector_cosine_ops);
                 """
                 connection.execute(text(create_index_sql))
+                connection.commit()
                 # self.vector_index.create(connection) # (psycopg.errors.UndefinedObject) operator class "vector_l2_ops" does not exist for access method "btree"
             except Exception as e:
                 logger.error(f"创建索引时出错: {e}")
+                connection.rollback()
+                raise
 
     def _initialize_embeddings(self):
         """初始化嵌入并添加到数据库。"""
@@ -149,7 +141,7 @@ class PGVectorWrapper(BaseVectorDB):
         with self.db.Session() as session:
             try:
                 new_items = [
-                    VectorStore(
+                    self.table_cls(
                         content=self.text_chunks[i],
                         additional_metadata={},
                         embedding=vector,
@@ -174,8 +166,8 @@ class PGVectorWrapper(BaseVectorDB):
         query_embedding = self.get_query_embedding(query)
         with self.db.Session() as session:
             results = session.scalars(
-                select(VectorStore.content)
-                .order_by(VectorStore.embedding.cosine_distance(query_embedding))
+                select(self.table_cls.content)
+                .order_by(self.table_cls.embedding.cosine_distance(query_embedding))
                 .limit(top_k)
             ).all()
         return results
@@ -192,9 +184,9 @@ class PGVectorWrapper(BaseVectorDB):
         with self.db.Session() as session:
             results = session.execute(
                 select(
-                    (1 - VectorStore.embedding.cosine_distance(query_embedding)).label('score')
+                    (1 - self.table_cls.embedding.cosine_distance(query_embedding)).label('score')
                 )
-                .order_by(VectorStore.embedding.cosine_distance(query_embedding))
+                .order_by(self.table_cls.embedding.cosine_distance(query_embedding))
                 .limit(top_k)
             ).scalars().all()
         return results
@@ -211,10 +203,10 @@ class PGVectorWrapper(BaseVectorDB):
         with self.db.Session() as session:
             results = session.execute(
                 select(
-                    VectorStore.content,
-                    (1 - VectorStore.embedding.cosine_distance(query_embedding)).label('score')
+                    self.table_cls.content,
+                    (1 - self.table_cls.embedding.cosine_distance(query_embedding)).label('score')
                 )
-                .order_by(VectorStore.embedding.cosine_distance(query_embedding))
+                .order_by(self.table_cls.embedding.cosine_distance(query_embedding))
                 .limit(top_k)
             ).all()
         return results
@@ -229,13 +221,30 @@ if __name__ == "__main__":
         "我爱北京天安门",
     ]
 
-    pgvector_wrapper = PGVectorWrapper(text_chunks=text_chunk, embedding=OpenAIEmbeddings(), db_instance=db_instance)
+    # 从环境变量获取数据库连接信息
+    db_instance = rdb_factory(
+        db_type=RDBType.Postgresql,
+        db_name=os.getenv("DB_NAME", "nl2sql"),
+        db_host=os.getenv("DB_HOST", "localhost"),
+        db_user=os.getenv("DB_USER", "liangzhu"),
+        db_password=os.getenv("DB_PASSWORD", ""),
+    )
 
+    # 定义 VectorStore 模型以匹配 SQL 模式
+    class VectorStore(Base):
+        __tablename__ = 'vector_store'
+        id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+        content: Mapped[str] = mapped_column(Text)
+        additional_metadata: Mapped[dict] = mapped_column(JSON)
+        embedding: Mapped[list] = mapped_column(Vector(1536))
+
+    # pgvector_wrapper = PGVectorWrapper(text_chunks=text_chunk, embedding=OpenAIEmbeddings(), db_instance=db_instance)
+    pgvector_wrapper = PGVectorWrapper(table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
     sorted_chunks = pgvector_wrapper.search_for_chunks(query, top_k=2)
     print(sorted_chunks)
 
-    scores = pgvector_wrapper.search_for_scores(query, top_k=2)
-    print(scores)
-
-    sorted_chunks_with_scores = pgvector_wrapper.search_for_chunks_with_scores(query, top_k=2)
-    print(sorted_chunks_with_scores)
+    # scores = pgvector_wrapper.search_for_scores(query, top_k=2)
+    # print(scores)
+    #
+    # sorted_chunks_with_scores = pgvector_wrapper.search_for_chunks_with_scores(query, top_k=2)
+    # print(sorted_chunks_with_scores)
