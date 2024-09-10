@@ -93,7 +93,7 @@ class PGVectorWrapper(BaseVectorDB):
         with self.db.engine.connect() as connection:
             try:
                 create_index_sql = """
-                CREATE INDEX vector_store_embedding_hnsw_idx 
+                CREATE INDEX IF NOT EXISTS vector_store_embedding_hnsw_idx 
                 ON vector_store
                 USING hnsw (embedding vector_cosine_ops);
                 """
