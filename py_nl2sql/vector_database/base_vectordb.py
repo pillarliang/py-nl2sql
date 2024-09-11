@@ -18,15 +18,6 @@ class BaseVectorDB(ABC):
         pass
 
     @abstractmethod
-    def add(self, vectors: np.ndarray) -> None:
-        """
-        向索引中添加向量
-
-        :param vectors: 要添加到索引的向量
-        """
-        pass
-
-    @abstractmethod
     def get_chunks_embedding(self, text_chunks: List[str]) -> np.ndarray:
         """
         获取文本块的嵌入向量
