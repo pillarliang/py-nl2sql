@@ -16,7 +16,7 @@ def create_connector(connector_class: Type[SQLDatabase], db_host: str, db_port: 
     )
 
 
-def rdb_factory(
+def create_rdb(
         db_type: str,
         db_name: str,
         db_host: Optional[str] = None,

@@ -4,7 +4,7 @@ import logging
 
 from py_nl2sql.constants.prompts import CREATE_SAMPLE_SQL_FROM_TABLE
 from py_nl2sql.constants.type import GenerateSampleSQLResponse
-from py_nl2sql.relational_database.sql_factory import rdb_factory
+from py_nl2sql.relational_database.sql_factory import create_rdb
 from py_nl2sql.vector_database.faiss_wrapper import FaissWrapper
 from py_nl2sql.utilities.db_state_machine import NL2SQLStateMachine, NL2SQLState
 from py_nl2sql.utilities.decorators import db_singleton
@@ -40,7 +40,7 @@ class DBInstance:
         self.db_user = db_user or os.getenv("LOCAL_DB_USER")
         self.db_password = db_password if db_password is not None else os.getenv("LOCAL_DB_PASSWORD")
 
-        self.db = rdb_factory(
+        self.db = create_rdb(
             db_type=self.db_type,
             db_name=self.db_name,
             db_host=self.db_host,

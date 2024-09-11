@@ -15,19 +15,21 @@ import os
 
 from py_nl2sql.constants.type import RDBType
 from py_nl2sql.relational_database.sql_database import SQLDatabase
-from py_nl2sql.relational_database.sql_factory import rdb_factory
+from py_nl2sql.relational_database.sql_factory import create_rdb
 from py_nl2sql.vector_database.base_vectordb import BaseVectorDB
+
 
 logger = logging.getLogger(__name__)
 
+# 如果Base实例在不同的文件中定义，那么它们会被视为不同的上下文环境。由于是两个不同的 Base，它们不共享同一个元数据（Metadata）。
+PGVectorBase = declarative_base()
+
+
 # 定义基类
-Base = declarative_base()
-
-
 class PGVectorWrapper(BaseVectorDB):
     def __init__(
             self,
-            table_cls: Type[Base],
+            table_cls: Type[PGVectorBase],
             embedding: Any,
             db_instance: SQLDatabase,
             text_chunks: Optional[List[str]] = None,
@@ -50,12 +52,12 @@ class PGVectorWrapper(BaseVectorDB):
         self.similarity_measure = similarity_measure or "vector_l2_ops"
         self.vector_index = None
         self.db = db_instance
+        self._create_vector_extension()
 
         if self.text_chunks:
             if not self._is_table_exists():
-                self._create_vector_extension()
                 # 创建表
-                Base.metadata.create_all(self.db.engine)
+                PGVectorBase.metadata.create_all(self.db.engine)
                 # 创建索引
                 self._create_index()
 
@@ -78,7 +80,8 @@ class PGVectorWrapper(BaseVectorDB):
     def _create_index(self):
         """创建索引实例。"""
         # ⚠️⚠️⚠️
-        # 在 Psycopg 3 下使用下面这种方式（source from:https://github.com/pgvector/pgvector-python/blob/master/README.md#sqlalchemy ）
+        # 在 Psycopg 3 下使用下面这种方式
+        # （source from:https://github.com/pgvector/pgvector-python/blob/master/README.md#sqlalchemy ）
         # 报错：# (psycopg.errors.UndefinedObject) operator class "vector_l2_ops" does not exist for access method "btree"
         # 所以使用 connection.execute 的方式创建索引。
         # ⚠️⚠️⚠️
@@ -99,7 +102,8 @@ class PGVectorWrapper(BaseVectorDB):
                 """
                 connection.execute(text(create_index_sql))
                 connection.commit()
-                # self.vector_index.create(connection) # (psycopg.errors.UndefinedObject) operator class "vector_l2_ops" does not exist for access method "btree"
+                # self.vector_index.create(connection)
+            # (psycopg.errors.UndefinedObject) operator class "vector_l2_ops" does not exist for access method "btree"
             except Exception as e:
                 logger.error(f"创建索引时出错: {e}")
                 connection.rollback()
@@ -222,7 +226,7 @@ if __name__ == "__main__":
     ]
 
     # 从环境变量获取数据库连接信息
-    db_instance = rdb_factory(
+    db_instance = create_rdb(
         db_type=RDBType.Postgresql,
         db_name=os.getenv("DB_NAME", "nl2sql"),
         db_host=os.getenv("DB_HOST", "localhost"),
@@ -230,13 +234,15 @@ if __name__ == "__main__":
         db_password=os.getenv("DB_PASSWORD", ""),
     )
 
-    # 定义 VectorStore 模型以匹配 SQL 模式
-    class VectorStore(Base):
-        __tablename__ = 'aa'
+    class VectorStore(PGVectorBase):
+        __tablename__ = 'aab'
         id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
         content: Mapped[str] = mapped_column(Text)
         additional_metadata: Mapped[dict] = mapped_column(JSON)
         embedding: Mapped[list] = mapped_column(Vector(1536))
+
+
+    PGVectorBase.metadata.create_all(db_instance.engine)
 
     pgvector_wrapper = PGVectorWrapper(text_chunks=text_chunk, table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
     # pgvector_wrapper = PGVectorWrapper(table_cls=VectorStore, embedding=OpenAIEmbeddings(), db_instance=db_instance)
