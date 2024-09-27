@@ -32,7 +32,6 @@ class LLM:
     def get_structured_response(self, query: str, response_format):
         completion = self.client.beta.chat.completions.parse(
             model=LLMModel.Default,
-            # TODO: currently using a specific model, due to only lasted model support structured response
             messages=[{"role": "user", "content": query}],
             response_format=response_format,
         )
