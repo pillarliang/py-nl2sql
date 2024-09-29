@@ -2,13 +2,23 @@
 This system is based on the paper "DINSQL:
 A Deep Interaction Network based Sequence-to-Sequence Model for Global Legal Judgment Prediction"
 """
-from py_nl2sql.core.din_sql.prompts import QUESTION_UNDERSTANDING, DIN_TASK_PROMPT, SubtaskName, SubtaskQuestion, \
-    SubtaskOutputFormat
-from py_nl2sql.core.din_sql.type import DINQuestionUnderstanding, DINSelectResponse, DINFromResponse, \
-    DINGroupByResponse, \
-    DINHavingResponse, DINOrderByResponse, DINWhereResponse
+from py_nl2sql.core.din_sql.prompts import (
+    QUESTION_UNDERSTANDING,
+    DIN_TASK_PROMPT,
+    SubtaskName,
+    SubtaskQuestion,
+    SubtaskOutputFormat,
+)
+from py_nl2sql.core.din_sql.type import (
+    DINQuestionUnderstanding,
+    DINSelectResponse,
+    DINFromResponse,
+    DINGroupByResponse,
+    DINHavingResponse,
+    DINOrderByResponse,
+    DINWhereResponse
+)
 from py_nl2sql.models.llm import LLM
-
 
 class DINSQLWorkflow:
     def __init__(self, query: str):
@@ -16,29 +26,19 @@ class DINSQLWorkflow:
         self.query = query
         self.previous_selections = dict()
 
-    def question_understanding(self, query: str) -> DINQuestionUnderstanding:
+    def question_understanding(self) -> DINQuestionUnderstanding:
         """
         The first step in the workflow is to understand the question.
         The aim is to extract key points from the user's query.
         """
-        llm_query = QUESTION_UNDERSTANDING.format(query=query)
+        llm_query = QUESTION_UNDERSTANDING.format(query=self.query)
         res = self.llm.get_structured_response(query=llm_query, response_format=DINQuestionUnderstanding)
         return res
 
-    def task_decomposition(self, extracted_elements: DINQuestionUnderstanding):
+    def task_decomposition(self, extracted_elements):
         """
         The second step in the workflow is to decompose the task.
         """
-        extracted_elements = {
-            'select_columns': ['salesperson_name', 'SUM(sales_amount) AS total_sales'],
-            'tables': ['sales_records'],
-            'conditions': ['SUM(sales_amount) > 100000'],
-            'operations': {
-                'aggregation': True,
-                'group_by': ['salesperson_name'],
-                'order_by': {'column': 'total_sales', 'direction': 'DESC'}
-            }
-        }
 
         subtasks = []
 
@@ -163,7 +163,7 @@ class DINSQLWorkflow:
         select_clause = f"SELECT {', '.join(self.previous_selections['select_columns'])}"
 
         # Build FROM clause
-        from_clause = f"FROM {self.previous_selections['from_table']}"
+        from_clause = f"FROM {self.previous_selections['tables']}"
 
         # Build GROUP BY clause
         group_by_clause = ""
@@ -193,8 +193,15 @@ class DINSQLWorkflow:
         return sql_query
 
     def execute(self):
-        extracted_elements = self.question_understanding(self.query)
+        extracted_elements = self.question_understanding()
         self.task_decomposition(extracted_elements)
         self.sub_task_resolution()
         res = self.sql_assembly()
         return res
+
+
+if __name__ == "__main__":
+    query = "Retrieve the names and total sales of all salespeople with sales exceeding 100,000, and sort the results in descending order of total sales."
+    workflow = DINSQLWorkflow(query)
+    res = workflow.execute()
+    print(res)

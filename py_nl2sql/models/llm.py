@@ -31,11 +31,11 @@ class LLM:
 
     def get_structured_response(self, query: str, response_format):
         completion = self.client.beta.chat.completions.parse(
-            model=LLMModel.Default,
+            model=LLMModel.Default.value,
             messages=[{"role": "user", "content": query}],
             response_format=response_format,
         )
-
+        print(completion)
         return json.loads(completion.choices[0].message.content)
 
     def get_multimodal_response(self, query: str, contexts):
