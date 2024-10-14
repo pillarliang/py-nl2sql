@@ -5,7 +5,14 @@ from py_nl2sql.relational_database.postgresql_connector import PostgreSQLConnect
 from py_nl2sql.relational_database.sql_database import SQLDatabase
 
 
-def create_connector(connector_class: Type[SQLDatabase], db_host: str, db_port: str, db_user: str, db_password: str, db_name: str):
+def create_connector(
+        connector_class: Type[SQLDatabase],
+        db_host: str,
+        db_port: str,
+        db_user: str,
+        db_password: str,
+        db_name: str,
+) -> SQLDatabase:
     """create database connector instance."""
     return connector_class.from_uri_db(
         host=db_host,
