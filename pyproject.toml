@@ -10,23 +10,23 @@ repository = "https://github.com/pillarliang/py-nl2sql"
 
 [tool.poetry.dependencies]
 python = "^3.10.1"
-numpy = "^1.21.0"
-openai = "^1.44.1"
-pydantic = "^2.9.1"
-python-dotenv = "^1.0.1"
-faiss-cpu = "^1.8.0.post1"
-sqlalchemy = "^2.0.34"
-pymysql = "^1.1.1"
-poetry-core = "^1.9.0"
-black = "^24.8.0"
+numpy = "*"
+openai = "*"
+pydantic = "*"
+python-dotenv = "*"
+faiss-cpu = "*"
+sqlalchemy = "*"
+pymysql = "*"
+poetry-core = "*"
+black = "*"
 psycopg = {extras = ["binary"], version = "^3.2.1"}
 pgvector = "^0.3.0"
-jupyter = "^1.1.1"
-langchain-openai = "^0.2.2"
+jupyter = "*"
+langchain-openai = "*"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.2"
+pytest = "*"
 
 [build-system]
 requires = ["poetry-core"]
